@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SORTIQ - Admin Panel</title>
+    <!-- Perbaikan Favicon -->
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        slate: { 850: '#151F32', 950: '#020617' } 
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        [x-cloak] { display: none !important; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans overflow-hidden" x-data="adminData">
+
+    <div class="flex h-screen w-full">
+        <!-- === SIDEBAR === -->
+        <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white border-r border-slate-800 h-full z-30 shadow-2xl transition-all duration-300">
+            <div class="p-6 flex items-center gap-3 border-b border-slate-800/50">
+                <!-- LOGO FIX: Mengganti gradien menjadi gambar logo.jpg -->
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+                    <img src="logo.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight leading-none text-white">SORTIQ</h1>
+                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-1">Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-3 space-y-1 overflow-y-auto mt-6 custom-scrollbar">
+                <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Main Menu</p>
+                <template x-for="item in navItems" :key="item.id">
+                    <button @click="setPage(item.id)" 
+                            :class="currentPage === item.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'"
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 group relative">
+                        <i :class="item.icon" class="text-xl transition-transform group-hover:scale-110"></i>
+                        <span x-text="item.label"></span>
+                        <div x-show="item.id === 'verify' && pendingRequests.length > 0" class="absolute right-3 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm" x-text="pendingRequests.length"></div>
+                    </button>
+                </template>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-850">
+                <div class="flex items-center gap-3">
+                    <img :src="`https://ui-avatars.com/api/?name=Gregorius+Olvans&background=059669&color=fff`" class="w-9 h-9 rounded-full border border-slate-600">
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-sm font-bold truncate text-white">Super Admin</p>
+                        <p class="text-[10px] text-slate-400 truncate" x-text="adminEmail"></p>
+                    </div>
+                    <button @click="logout" class="text-slate-400 hover:text-white transition"><i class="ph-bold ph-sign-out"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- === MAIN CONTENT === -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50">
+            <!-- Header -->
+            <header class="flex justify-between items-center px-6 py-4 md:px-10 md:py-5 z-20 glass sticky top-0 shadow-sm">
+                <div class="flex items-center gap-3 md:hidden">
+                    <!-- LOGO MOBILE FIX -->
+                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="logo.jpg" alt="S" class="w-full h-full object-cover">
+                    </div>
+                    <span class="font-bold text-lg tracking-tight">SORTIQ Admin</span>
+                </div>
+                <div class="hidden md:block">
+                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight" x-text="pageTitle"></h2>
+                    <p class="text-slate-500 text-xs font-medium" x-text="todayDate"></p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-white border border-slate-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm text-sm">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span class="text-slate-600 font-medium">Database Connected</span>
+                    </div>
+                    <button class="relative w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-50 transition">
+                        <i class="ph-bold ph-bell text-xl text-slate-600"></i>
+                        <span x-show="pendingRequests.length > 0" class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="main-scroll">
+                
+                <!-- 1. DASHBOARD OVERVIEW -->
+                <div x-show="currentPage === 'dashboard'" x-transition.opacity.duration.300ms class="space-y-6 max-w-7xl mx-auto">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-users"></i></div>
+                                <span class="text-green-500 bg-green-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                    <i class="ph-bold ph-trend-up"></i> 12%
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="users.length">0</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Total Pengguna</p>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-emerald-100 text-emerald-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-trash"></i></div>
+                                <span class="text-green-500 bg-green-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                    <i class="ph-bold ph-trend-up"></i> 8%
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="totalTrashWeight + ' Kg'">0 Kg</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Sampah Terkumpul</p>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-truck"></i></div>
+                                <span x-show="pendingRequests.length > 0" class="text-red-500 bg-red-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                    Pending
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="pendingRequests.length">0</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Menunggu Verifikasi</p>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-purple-100 text-purple-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-gift"></i></div>
+                                <span class="text-green-500 bg-green-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                    <i class="ph-bold ph-trend-up"></i> 5%
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 tracking-tight">156</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1">Reward Diklaim</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts & Lists -->
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-800">Statistik Setoran Sampah</h3>
+                                    <p class="text-xs text-slate-400">Volume sampah harian secara global</p>
+                                </div>
+                                <select class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-3 py-2 outline-none font-bold text-slate-600">
+                                    <option>7 Hari Terakhir</option>
+                                    <option>Bulan Ini</option>
+                                </select>
+                            </div>
+                            <div class="h-64 w-full"><canvas id="adminChart"></canvas></div>
+                        </div>
+
+                        <!-- Recent Requests -->
+                        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg text-slate-800">Request Masuk</h3>
+                                <button @click="setPage('verify')" class="text-emerald-600 text-xs font-bold hover:underline">Semua</button>
+                            </div>
+                            <div class="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[300px] custom-scrollbar">
+                                <template x-for="req in pendingRequests.slice(0,4)" :key="req.id">
+                                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition cursor-pointer" @click="openVerifyModal(req)">
+                                        <div class="w-10 h-10 rounded-full bg-white border border-slate-200 overflow-hidden shrink-0 p-0.5">
+                                            <img :src="`https://ui-avatars.com/api/?name=${req.userName}&background=random`" class="w-full h-full rounded-full object-cover">
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-slate-800 truncate" x-text="req.userName"></p>
+                                            <p class="text-[10px] text-slate-500 truncate flex items-center gap-1">
+                                                <i class="ph-fill ph-scales text-emerald-500"></i> <span x-text="req.weight"></span> Kg
+                                            </p>
+                                        </div>
+                                        <i class="ph-bold ph-caret-right text-slate-300 text-xs"></i>
+                                    </div>
+                                </template>
+                                <div x-show="pendingRequests.length === 0" class="text-center py-10 text-slate-400 text-xs">Tidak ada permintaan baru.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. VERIFIKASI (PICKUP REQUESTS) -->
+                <div x-show="currentPage === 'verify'" x-transition.opacity.duration.300ms class="max-w-7xl mx-auto">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Antrean Penjemputan Real-time</h3>
+                            <p class="text-sm text-slate-500">Data masuk otomatis dari HP pengguna.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-100">
+                                    <tr>
+                                        <th class="p-5">ID Request</th>
+                                        <th class="p-5">User</th>
+                                        <th class="p-5">Lokasi</th>
+                                        <th class="p-5">Berat & Reward</th>
+                                        <th class="p-5">Status</th>
+                                        <th class="p-5 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    <template x-for="req in allDeposits" :key="req.id">
+                                        <tr class="hover:bg-slate-50/50 transition group">
+                                            <td class="p-5 font-mono text-slate-400 text-xs" x-text="'#'+req.id.slice(-4)"></td>
+                                            <td class="p-5">
+                                                <div class="flex items-center gap-3">
+                                                    <img :src="`https://ui-avatars.com/api/?name=${req.userName}&background=random`" class="w-8 h-8 rounded-full">
+                                                    <div>
+                                                        <p class="font-bold text-slate-700 leading-none" x-text="req.userName"></p>
+                                                        <p class="text-[10px] text-slate-400 mt-1" x-text="req.userEmail"></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-5 max-w-[200px]">
+                                                <div class="flex items-center gap-1 text-slate-600 truncate">
+                                                    <i class="ph-fill ph-map-pin text-slate-400"></i>
+                                                    <span x-text="req.address"></span>
+                                                </div>
+                                            </td>
+                                            <td class="p-5">
+                                                <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs font-bold whitespace-nowrap" x-text="req.weight + ' Kg'"></span>
+                                                <div class="text-[10px] text-emerald-600 mt-1 font-bold">+<span x-text="req.xpReward"></span> XP</div>
+                                            </td>
+                                            <td class="p-5">
+                                                <span :class="req.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'" class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase border" x-text="req.status"></span>
+                                            </td>
+                                            <td class="p-5 text-center">
+                                                <button x-show="req.status === 'Pending'" @click="openVerifyModal(req)" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-600 transition shadow-md">
+                                                    Proses
+                                                </button>
+                                                <span x-show="req.status === 'Approved'" class="text-emerald-500 font-bold text-xs"><i class="ph-bold ph-check-circle"></i> Selesai</span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. DATA PENGGUNA -->
+                <div x-show="currentPage === 'users'" x-transition.opacity.duration.300ms class="max-w-7xl mx-auto">
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                            <h3 class="font-bold text-lg text-slate-800">Database Pengguna SORTIQ</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <template x-for="user in users" :key="user.id">
+                                <div class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition cursor-pointer relative overflow-hidden">
+                                    <div class="flex items-center gap-4">
+                                        <img :src="`https://ui-avatars.com/api/?name=${user.name}&background=random`" class="w-14 h-14 rounded-2xl shadow-sm object-cover">
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-bold text-slate-800 truncate text-base" x-text="user.name"></h4>
+                                            <p class="text-xs text-slate-500 mb-2 truncate" x-text="user.email"></p>
+                                            <div class="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase">
+                                                <span class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md border"><i class="ph-fill ph-coin text-yellow-500"></i> <span x-text="user.xp"></span> XP</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. MARKET MANAGEMENT -->
+                <div x-show="currentPage === 'market'" class="text-center py-20 text-slate-400 italic">Modul Manajemen Market akan segera dihubungkan ke Firestore.</div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- === MODAL VERIFIKASI === -->
+    <div x-show="showVerifyModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak style="display: none;">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showVerifyModal = false"></div>
+        <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+            <div class="bg-white p-6 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-800">Detail Verifikasi</h3>
+                    <p class="text-xs text-slate-400" x-text="'ID: #' + selectedReq?.id.slice(-6)"></p>
+                </div>
+                <button @click="showVerifyModal = false" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <div class="p-6 grid grid-cols-2 gap-6">
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">User Pemohon</label>
+                        <div class="flex items-center gap-2 mt-1">
+                            <img :src="`https://ui-avatars.com/api/?name=${selectedReq?.userName}&background=random`" class="w-6 h-6 rounded-full">
+                            <p class="font-bold text-slate-800" x-text="selectedReq?.userName"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Berat Verifikasi</label>
+                        <p class="font-mono text-emerald-600 font-black text-2xl" x-text="selectedReq?.weight + ' Kg'"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Lokasi Jemput</label>
+                    <div class="h-32 bg-slate-100 rounded-xl overflow-hidden relative border">
+                        <iframe src="https://maps.google.com/maps?q=-7.2575,112.7521&z=13&output=embed" width="100%" height="100%" style="border:0; filter: grayscale(1) opacity(0.7);" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                    <p class="text-[10px] text-slate-600 mt-2 font-medium" x-text="selectedReq?.address"></p>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-100 bg-slate-50 flex flex-col gap-4">
+                <div class="flex gap-3">
+                    <button @click="showVerifyModal = false" class="flex-1 bg-white border border-slate-200 text-red-500 rounded-xl font-bold text-sm py-3 transition">Tolak</button>
+                    <button @click="approveDeposit(selectedReq)" class="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 py-3" :disabled="isProcessing">
+                        <i class="ph-bold ph-check-circle text-lg"></i> Setujui & Beri XP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div x-show="toast.show" x-transition class="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white pl-4 pr-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border-l-4 border-emerald-500" style="display: none;">
+        <div class="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400"><i class="ph-fill ph-check-circle text-xl"></i></div>
+        <div>
+            <p class="font-bold text-sm" x-text="toast.title"></p>
+            <p class="text-xs text-slate-400" x-text="toast.message"></p>
+        </div>
+    </div>
+
+    <!-- === LOGIKA BACKEND FIREBASE (OTAK UTAMA) === -->
+    <script type="module">
+        import { auth, db, onAuthStateChanged, signOut, doc, onSnapshot, collection, query, orderBy, updateDoc, getDoc } from './firebase-init.js';
+
+        window.fbAdmin = {
+            init: (alpine) => {
+                onAuthStateChanged(auth, (user) => {
+                    // VALIDASI AKSES KHUSUS ADMIN GREGORIUS
+                    if (!user || user.email !== 'gregoriusolvans16@gmail.com') {
+                        alert("Akses Terbatas! Area khusus Admin.");
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // PERBAIKAN DI SINI: Hapus orderBy() dari query
+                    // Ambil koleksi biasa, tanpa filter/sort di level database
+                    const qDep = collection(db, "deposits");
+                    
+                    onSnapshot(qDep, (snap) => {
+                        const rawData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        
+                        // Lakukan sorting manual menggunakan JavaScript
+                        // Urutkan berdasarkan tanggal (terbaru di atas)
+                        alpine.allDeposits = rawData.sort((a, b) => {
+                            const dateA = new Date(a.date || 0);
+                            const dateB = new Date(b.date || 0);
+                            return dateB - dateA; 
+                        });
+                    });
+
+                    // 2. Listen Real-time Daftar User
+                    onSnapshot(collection(db, "users"), (snap) => {
+                        alpine.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    });
+                });
+            },
+            
+            // LOGIKA APPROVAL: Update status transaksi & Tambah XP User sekaligus
+            approveDeposit: async (item) => {
+                try {
+                    // 1. Update status setoran jadi Approved
+                    await updateDoc(doc(db, "deposits", item.id), { status: 'Approved' });
+                    
+                    // 2. Ambil XP user saat ini
+                    const userRef = doc(db, "users", item.uid);
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (userSnap.exists()) {
+                        const currentXP = userSnap.data().xp || 0;
+                        // 3. Tambahkan XP reward dari setoran
+                        await updateDoc(userRef, { xp: currentXP + item.xpReward });
+                        return true;
+                    }
+                    return false;
+                } catch (e) {
+                    console.error(e);
+                    return false;
+                }
+            },
+
+            logout: () => signOut(auth).then(() => window.location.href = 'login.html')
+        };
+    </script>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('adminData', () => ({
+                currentPage: 'dashboard',
+                pageTitle: 'Dashboard Overview',
+                todayDate: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                adminEmail: 'gregoriusolvans16@gmail.com',
+                
+                showVerifyModal: false,
+                selectedReq: null,
+                isProcessing: false,
+                
+                navItems: [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'ph-bold ph-squares-four' },
+                    { id: 'verify', label: 'Verifikasi Setoran', icon: 'ph-bold ph-check-square-offset' },
+                    { id: 'users', label: 'Data Pengguna', icon: 'ph-bold ph-users' },
+                    { id: 'market', label: 'Manajemen Market', icon: 'ph-bold ph-storefront' },
+                ],
+
+                // Firebase Sync Data
+                allDeposits: [],
+                users: [],
+                
+                get pendingRequests() { return this.allDeposits.filter(d => d.status === 'Pending'); },
+                get totalTrashWeight() { 
+                    return this.allDeposits
+                        .filter(d => d.status === 'Approved')
+                        .reduce((acc, curr) => acc + parseFloat(curr.weight), 0).toFixed(1); 
+                },
+
+                toast: { show: false, title: '', message: '' },
+
+                init() {
+                    // Beri waktu sebentar agar module Firebase siap
+                    setTimeout(() => window.fbAdmin.init(this), 500);
+                    this.$nextTick(() => this.initChart());
+                },
+
+                setPage(id) {
+                    this.currentPage = id;
+                    this.pageTitle = this.navItems.find(i => i.id === id).label;
+                    if(id === 'dashboard') this.$nextTick(() => this.initChart());
+                    document.getElementById('main-scroll').scrollTop = 0;
+                },
+
+                openVerifyModal(req) {
+                    this.selectedReq = req;
+                    this.showVerifyModal = true;
+                },
+
+                async approveDeposit(req) {
+                    this.isProcessing = true;
+                    const success = await window.fbAdmin.approveDeposit(req);
+                    if(success) {
+                        this.showToast('Berhasil!', `Poin XP telah dikirim ke ${req.userName}`);
+                        this.showVerifyModal = false;
+                    } else {
+                        alert("Gagal memproses. Coba lagi.");
+                    }
+                    this.isProcessing = false;
+                },
+
+                showToast(title, message) {
+                    this.toast.title = title; this.toast.message = message; this.toast.show = true;
+                    setTimeout(() => this.toast.show = false, 3000);
+                },
+
+                logout() { window.fbAdmin.logout(); },
+
+                initChart() {
+                    const ctx = document.getElementById('adminChart');
+                    if (!ctx) return;
+                    if (Chart.getChart(ctx)) Chart.getChart(ctx).destroy();
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                            datasets: [{ label: 'Kg Sampah', data: [65, 59, 80, 81, 56, 120, 90], backgroundColor: '#10B981', borderRadius: 6 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

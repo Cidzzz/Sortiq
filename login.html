@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Masuk - SORTIQ</title>
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 md:p-6" x-data="authApp">
+    
+    <div class="bg-white w-full max-w-md p-6 md:p-8 rounded-3xl shadow-xl border border-slate-100 relative overflow-hidden">
+        <!-- Tombol Kembali -->
+        <a href="beranda.html" class="absolute top-5 right-5 text-slate-400 hover:text-slate-800 transition p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg>
+        </a>
+        
+        <div class="text-center mb-6 md:mb-8 mt-2">
+            <!-- Logo Anda -->
+            <img src="logo.png" onerror="this.src='https://placehold.co/80x80/10b981/ffffff?text=S'" class="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 object-contain">
+            <h1 class="text-xl md:text-2xl font-bold text-slate-800" x-text="isLogin ? 'Selamat Datang' : 'Buat Akun Baru'"></h1>
+            <p class="text-slate-500 text-xs md:text-sm mt-1" x-text="isLogin ? 'Masuk untuk mulai memilah sampah.' : 'Gabung komunitas SORTIQ sekarang.'"></p>
+        </div>
+
+        <!-- Notifikasi Pesan Error -->
+        <div x-show="errorMsg" x-transition class="bg-red-50 text-red-600 text-xs p-3 rounded-xl mb-4 text-center font-bold border border-red-100" x-text="errorMsg"></div>
+
+        <form @submit.prevent="submitAuth" class="space-y-3 md:space-y-4">
+            
+            <!-- Input Nama (Muncul hanya saat Daftar) -->
+            <div x-show="!isLogin" x-transition>
+                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                <input type="text" x-model="form.name" placeholder="Nama Kamu" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
+            </div>
+
+            <div>
+                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Email</label>
+                <input type="email" x-model="form.email" required placeholder="user@sortiq.id" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
+            </div>
+            
+            <div>
+                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Password</label>
+                <input type="password" x-model="form.password" required placeholder="••••••••" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
+            </div>
+
+            <button type="submit" :disabled="isLoading" class="w-full bg-slate-900 text-white py-3 md:py-3.5 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition active:scale-95 text-sm md:text-base mt-2 flex justify-center items-center gap-2">
+                <span x-show="isLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span x-text="isLogin ? 'Masuk Sekarang' : 'Daftar Akun'"></span>
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs md:text-sm text-slate-500">
+            <span x-text="isLogin ? 'Belum punya akun?' : 'Sudah punya akun?'"></span> 
+            <button @click="isLogin = !isLogin; errorMsg = ''" class="text-emerald-600 font-bold hover:underline ml-1" x-text="isLogin ? 'Daftar' : 'Masuk'"></button>
+        </div>
+    </div>
+
+    <!-- === LOGIKA BACKEND FIREBASE (PENGGANTI LOCALSTORAGE) === -->
+    <script type="module">
+        import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, doc, setDoc } from './firebase-init.js';
+
+        // Fungsi Global untuk diakses AlpineJS
+        window.firebaseAuth = {
+            login: async (email, password) => {
+                // 1. Validasi Keras Khusus Admin
+                if (email === 'gregoriusolvans16@gmail.com') {
+                    if (password !== 'Olvans123') {
+                        throw new Error("Password Admin Salah! Akses Ditolak.");
+                    }
+                }
+
+                // 2. Proses Sign In ke Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                
+                // 3. Pengalihan Halaman Berdasarkan Peran
+                if (email === 'gregoriusolvans16@gmail.com') {
+                    localStorage.setItem('sortiq_role', 'admin');
+                    window.location.href = 'dashboard-admin.html';
+                } else {
+                    localStorage.setItem('sortiq_role', 'user');
+                    window.location.href = 'dashboard.html';
+                }
+            },
+            register: async (name, email, password) => {
+                // 1. Buat Akun di Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Simpan Profil Tambahan di Firestore Database
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    xp: 0,
+                    role: 'user',
+                    createdAt: new Date().toISOString()
+                });
+
+                alert('Pendaftaran berhasil! Silakan masuk ke akun baru Anda.');
+                return true;
+            }
+        };
+    </script>
+
+    <!-- === LOGIKA UI ALPINEJS === -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('authApp', () => ({
+                isLogin: true,
+                isLoading: false,
+                errorMsg: '',
+                form: { name: '', email: '', password: '' },
+
+                async submitAuth() {
+                    this.isLoading = true;
+                    this.errorMsg = '';
+                    
+                    try {
+                        if (this.isLogin) {
+                            // Jalankan Fungsi Login
+                            await window.firebaseAuth.login(this.form.email, this.form.password);
+                        } else {
+                            // Jalankan Fungsi Register
+                            if (!this.form.name) throw new Error("Nama lengkap wajib diisi.");
+                            const success = await window.firebaseAuth.register(this.form.name, this.form.email, this.form.password);
+                            if (success) {
+                                this.isLogin = true;
+                                this.form.password = '';
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        // Terjemahan pesan error umum dari Firebase ke Bahasa Indonesia
+                        if (e.code === 'auth/invalid-credential') {
+                            this.errorMsg = "Email atau password salah.";
+                        } else if (e.code === 'auth/email-already-in-use') {
+                            this.errorMsg = "Email ini sudah digunakan oleh akun lain.";
+                        } else if (e.code === 'auth/weak-password') {
+                            this.errorMsg = "Password terlalu lemah (minimal 6 karakter).";
+                        } else {
+                            this.errorMsg = e.message;
+                        }
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

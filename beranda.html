@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SORTIQ - Beranda</title>
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <!-- Libraries CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- CountUp (Angka Berjalan) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.0.7/countUp.umd.js"></script>
+    <!-- Vanilla Tilt (Efek Miring 3D) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        
+        /* Background Hero */
+        .hero-bg { 
+            background-image: radial-gradient(#10b981 1px, transparent 1px); 
+            background-size: 24px 24px; 
+            background-color: #fff; 
+            position: relative;
+        }
+        
+        .nav-active { color: #059669 !important; font-weight: 700; }
+        
+        /* Sembunyikan Scrollbar pada Slider tapi tetap bisa discroll */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animasi Mengambang */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        /* Partikel Background */
+        .particle {
+            position: absolute;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rise 15s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { bottom: -100px; transform: translateX(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { bottom: 100vh; transform: translateX(-100px); opacity: 0; }
+        }
+
+        /* Kursor Kedip untuk Typewriter */
+        .typewrite > .wrap { border-right: 0.08em solid #10b981; padding-right: 2px; }
+    </style>
+</head>
+<body class="text-slate-800 bg-slate-50 relative" data-spy="scroll" data-target="#navbar-menu" data-offset="100">
+
+    <!-- Navbar Responsif -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+            <a href="#beranda" class="flex items-center gap-2 md:gap-3 group">
+                <img src="logo.png" onerror="this.src='logo.jpg'" class="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-105 transition">
+                <span class="text-lg md:text-xl font-bold tracking-tight text-slate-900">SORTIQ<span class="text-emerald-500">.</span></span>
+            </a>
+            <!-- Menu Desktop -->
+            <div id="navbar-menu" class="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-slate-500">
+                <a href="#beranda" class="nav-link hover:text-emerald-600 transition">Beranda</a>
+                <a href="#tentang" class="nav-link hover:text-emerald-600 transition">Tentang</a>
+                <a href="#fitur" class="nav-link hover:text-emerald-600 transition">Fitur</a>
+                <a href="#faq" class="nav-link hover:text-emerald-600 transition">FAQ</a>
+                <a href="#kontak" class="nav-link hover:text-emerald-600 transition">Kontak</a>
+            </div>
+            <a href="login.html" class="px-5 py-2 md:px-6 md:py-2.5 bg-slate-900 text-white rounded-full font-bold text-xs md:text-sm shadow-lg hover:bg-emerald-600 transition transform active:scale-95 hover:shadow-emerald-500/30">
+                Masuk
+            </a>
+        </div>
+    </nav>
+
+    <!-- 1. Hero Section dengan Efek Parallax Mouse -->
+    <section id="beranda" class="pt-28 md:pt-32 pb-16 md:pb-20 hero-bg min-h-screen flex flex-col items-center justify-center relative px-4 overflow-hidden" onmousemove="parallax(event)">
+        
+        <!-- Partikel Animasi -->
+        <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="particle w-4 h-4 left-10 delay-0"></div>
+            <div class="particle w-8 h-8 left-1/4 delay-2000"></div>
+            <div class="particle w-6 h-6 left-1/2 delay-4000"></div>
+            <div class="particle w-10 h-10 left-3/4 delay-1000"></div>
+            <div class="particle w-5 h-5 left-[90%] delay-3000"></div>
+        </div>
+
+        <!-- Dekorasi Background Bergerak -->
+        <div class="absolute top-20 left-10 w-32 h-32 bg-emerald-200/40 rounded-full blur-3xl" data-speed="2"></div>
+        <div class="absolute bottom-20 right-10 w-64 h-64 bg-blue-200/40 rounded-full blur-3xl" data-speed="-2"></div>
+
+        <!-- Text Content -->
+        <div class="text-center max-w-3xl z-10 mb-8 md:mb-12 relative" data-aos="fade-up" data-speed="1">
+            <span class="inline-block py-1 px-3 rounded-full bg-emerald-50 text-emerald-600 text-[10px] md:text-xs font-bold mb-4 border border-emerald-100 shadow-sm animate-float">
+                🌱 AI Waste Management V1.0
+            </span>
+            <h1 class="text-3xl sm:text-4xl md:text-6xl font-extrabold text-slate-900 mb-4 md:mb-6 leading-tight tracking-tight">
+                Pilah Sampah Jadi <br> 
+                <!-- TEKS KETIKAN -->
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400 typewrite" data-period="2000" data-type='[ "Lebih Cerdas.", "Lebih Mudah.", "Lebih Bernilai.", "Lebih Hijau." ]'>
+                    <span class="wrap"></span>
+                </span>
+            </h1>
+            <p class="text-sm sm:text-base md:text-lg text-slate-500 mb-6 md:mb-8 font-medium px-4 leading-relaxed max-w-2xl mx-auto">
+                Gunakan AI untuk scan sampah, kumpulkan poin, dan tukar dengan hadiah menarik. Bergabunglah dengan gerakan hijau sekarang.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 md:gap-4 w-full px-6 md:px-0">
+                <a href="login.html" class="group px-6 py-3 md:px-8 md:py-4 bg-emerald-600 text-white rounded-full font-bold shadow-xl hover:bg-emerald-700 transition flex items-center justify-center gap-2 text-sm md:text-base active:scale-95 hover:-translate-y-1 w-full sm:w-auto">
+                    <i class="ph-bold ph-camera text-lg md:text-xl group-hover:rotate-12 transition"></i> Mulai Scan
+                </a>
+                <a href="#tentang" class="px-6 py-3 md:px-8 md:py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold hover:border-emerald-500 hover:text-emerald-600 transition hover:-translate-y-1 hover:shadow-lg text-sm md:text-base w-full sm:w-auto">
+                    Pelajari Lebih
+                </a>
+            </div>
+        </div>
+
+        <!-- SLIDER GAMBAR RESPONSIF -->
+        <div class="w-full max-w-6xl relative group px-2 md:px-0" data-aos="fade-up" data-aos-delay="200">
+            <!-- Container Scroll -->
+            <div id="sliderTrack" class="flex overflow-x-auto snap-x snap-mandatory gap-4 md:gap-6 pb-8 hide-scroll px-4">
+                
+                <!-- Gambar 1 -->
+                <div class="snap-center shrink-0 w-[85vw] md:w-[850px] h-[250px] sm:h-[350px] md:h-[500px] relative rounded-2xl md:rounded-[2rem] overflow-hidden shadow-xl md:shadow-2xl border-4 border-white group/img">
+                    <img src="gambar1.png" onerror="this.src='https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1200'" class="w-full h-full object-cover transition duration-1000 group-hover/img:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6 md:p-10 opacity-90">
+                        <div class="text-white transform translate-y-4 group-hover/img:translate-y-0 transition duration-500">
+                            <span class="bg-emerald-500 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full mb-2 md:mb-3 inline-block">Teknologi</span>
+                            <h3 class="text-lg md:text-3xl font-bold mb-1">Inovasi Hijau</h3>
+                            <p class="text-xs md:text-base text-slate-200">AI Scanner tercanggih.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gambar 2 -->
+                <div class="snap-center shrink-0 w-[85vw] md:w-[850px] h-[250px] sm:h-[350px] md:h-[500px] relative rounded-2xl md:rounded-[2rem] overflow-hidden shadow-xl md:shadow-2xl border-4 border-white group/img">
+                    <img src="gambar2.png" onerror="this.src='https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=1200'" class="w-full h-full object-cover transition duration-1000 group-hover/img:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6 md:p-10 opacity-90">
+                        <div class="text-white transform translate-y-4 group-hover/img:translate-y-0 transition duration-500">
+                            <span class="bg-blue-500 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full mb-2 md:mb-3 inline-block">Energi</span>
+                            <h3 class="text-lg md:text-3xl font-bold mb-1">Energi Bersih</h3>
+                            <p class="text-xs md:text-base text-slate-200">Limbah jadi sumber daya.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gambar 3 -->
+                <div class="snap-center shrink-0 w-[85vw] md:w-[850px] h-[250px] sm:h-[350px] md:h-[500px] relative rounded-2xl md:rounded-[2rem] overflow-hidden shadow-xl md:shadow-2xl border-4 border-white group/img">
+                    <img src="gambar3.png" onerror="this.src='https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200'" class="w-full h-full object-cover transition duration-1000 group-hover/img:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6 md:p-10 opacity-90">
+                        <div class="text-white transform translate-y-4 group-hover/img:translate-y-0 transition duration-500">
+                            <span class="bg-amber-500 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full mb-2 md:mb-3 inline-block">Komunitas</span>
+                            <h3 class="text-lg md:text-3xl font-bold mb-1">Aksi Nyata</h3>
+                            <p class="text-xs md:text-base text-slate-200">Bergabung dengan kami.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tombol Navigasi Slider (Desktop Only) -->
+            <button onclick="scrollSlider('left')" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur p-3 md:p-4 rounded-full shadow-lg hover:bg-emerald-600 hover:text-white transition z-30 hidden md:block hover:scale-110 active:scale-95 group">
+                <i class="ph-bold ph-caret-left text-xl group-hover:animate-pulse"></i>
+            </button>
+            <button onclick="scrollSlider('right')" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur p-3 md:p-4 rounded-full shadow-lg hover:bg-emerald-600 hover:text-white transition z-30 hidden md:block hover:scale-110 active:scale-95 group">
+                <i class="ph-bold ph-caret-right text-xl group-hover:animate-pulse"></i>
+            </button>
+            
+            <!-- Floating Stats (Tilt Effect) -->
+            <div class="absolute -bottom-4 right-4 md:-bottom-6 md:right-8 bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3 animate-float z-20 scale-90 md:scale-100 origin-bottom-right cursor-pointer" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-perspective="500">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                    <i class="ph-fill ph-users text-xl md:text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-wider">Pengguna</p>
+                    <p class="text-lg md:text-2xl font-black text-slate-800"><span id="counter">0</span>k+</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Section Tentang Kami (RESPONSIF) -->
+    <section id="tentang" class="py-16 md:py-24 bg-white px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+                <div class="relative" data-aos="fade-right" data-tilt data-tilt-max="5">
+                    <div class="absolute -top-6 -left-6 w-full h-full border-2 border-emerald-100 rounded-[2rem] z-0 hidden md:block"></div>
+                    <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800" class="rounded-[1.5rem] md:rounded-[2rem] shadow-2xl relative z-10 w-full object-cover transform transition hover:scale-[1.02]">
+                </div>
+                
+                <div data-aos="fade-left">
+                    <h4 class="text-emerald-600 font-extrabold text-xs md:text-sm uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span class="w-8 h-[2px] bg-emerald-600"></span> Tentang Kami
+                    </h4>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 md:mb-6 leading-tight">
+                        Misi Menuju Indonesia <br> <span class="text-emerald-600">Bebas Sampah</span>
+                    </h2>
+                    <p class="text-sm md:text-lg text-slate-500 mb-6 md:mb-8 leading-relaxed">
+                        SORTIQ lahir dari keprihatinan terhadap masalah sampah yang menumpuk. Kami menggunakan teknologi AI sebagai jembatan menuju kebiasaan daur ulang yang lebih baik dan terukur.
+                    </p>
+                    <ul class="space-y-3 md:space-y-4">
+                        <li class="flex items-start gap-3 md:gap-4 p-3 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0"><i class="ph-fill ph-check-circle text-lg md:text-xl"></i></div>
+                            <span class="text-slate-600 text-sm md:text-base font-medium pt-1 md:pt-2">Teknologi AI yang akurat mendeteksi jenis sampah.</span>
+                        </li>
+                        <li class="flex items-start gap-3 md:gap-4 p-3 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0"><i class="ph-fill ph-gift text-lg md:text-xl"></i></div>
+                            <span class="text-slate-600 text-sm md:text-base font-medium pt-1 md:pt-2">Sistem reward poin yang menguntungkan pengguna.</span>
+                        </li>
+                        <li class="flex items-start gap-3 md:gap-4 p-3 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0"><i class="ph-fill ph-globe-hemisphere-east text-lg md:text-xl"></i></div>
+                            <span class="text-slate-600 text-sm md:text-base font-medium pt-1 md:pt-2">Berkontribusi langsung mengurangi emisi karbon.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Section Fitur Unggulan (RESPONSIF) -->
+    <section id="fitur" class="py-16 md:py-24 bg-slate-50 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-12 md:mb-16" data-aos="fade-up">
+                <h4 class="text-emerald-600 font-extrabold text-xs md:text-sm uppercase tracking-widest mb-2">Fitur Unggulan</h4>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Teknologi Untuk Bumi</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <!-- Fitur 1 -->
+                <div class="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-white shadow-sm border border-slate-100 hover:shadow-2xl transition duration-500 group relative overflow-hidden" data-aos="fade-up" data-aos-delay="0" data-tilt data-tilt-max="5" data-tilt-speed="400">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl md:text-3xl mb-4 md:mb-6 group-hover:bg-emerald-600 group-hover:text-white transition shadow-sm relative z-10">
+                        <i class="ph-duotone ph-scan"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3 text-slate-900 group-hover:text-emerald-700 transition relative z-10">AI Instant Scan</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed relative z-10">Deteksi otomatis jenis sampah organik & anorganik hanya dengan kamera HP Anda secara real-time.</p>
+                </div>
+                
+                <!-- Fitur 2 -->
+                <div class="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-white shadow-sm border border-slate-100 hover:shadow-2xl transition duration-500 group relative overflow-hidden" data-aos="fade-up" data-aos-delay="100" data-tilt data-tilt-max="5" data-tilt-speed="400">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-2xl md:text-3xl mb-4 md:mb-6 group-hover:bg-blue-600 group-hover:text-white transition shadow-sm relative z-10">
+                        <i class="ph-duotone ph-gift"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3 text-slate-900 group-hover:text-blue-700 transition relative z-10">Poin Reward</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed relative z-10">Ubah sampah menjadi berkah. Kumpulkan poin XP dan tukarkan dengan saldo E-Wallet atau hadiah menarik.</p>
+                </div>
+                
+                <!-- Fitur 3 -->
+                <div class="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-white shadow-sm border border-slate-100 hover:shadow-2xl transition duration-500 group relative overflow-hidden" data-aos="fade-up" data-aos-delay="200" data-tilt data-tilt-max="5" data-tilt-speed="400">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-2xl md:text-3xl mb-4 md:mb-6 group-hover:bg-amber-600 group-hover:text-white transition shadow-sm relative z-10">
+                        <i class="ph-duotone ph-map-pin"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3 text-slate-900 group-hover:text-amber-700 transition relative z-10">Lokasi Drop</h3>
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed relative z-10">Temukan lokasi bank sampah dan TPA terdekat yang terintegrasi peta satelit untuk navigasi akurat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Section FAQ (RESPONSIF) -->
+    <section id="faq" class="py-16 md:py-24 bg-white px-6">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-10 md:mb-12" data-aos="zoom-in">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Pertanyaan Umum</h2>
+                <p class="text-slate-500 mt-2 text-sm md:text-base">Paling sering ditanyakan oleh pengguna baru.</p>
+            </div>
+            <div class="space-y-4">
+                <div class="border border-slate-200 p-5 md:p-6 rounded-2xl cursor-pointer hover:border-emerald-500 hover:shadow-lg transition duration-300 group bg-white" onclick="toggleFaq(this)" data-aos="fade-up">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-base md:text-lg group-hover:text-emerald-700 transition">Apakah aplikasi ini gratis?</h4>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="ph-bold ph-caret-down group-hover:text-emerald-600 transition-transform duration-300"></i></div>
+                    </div>
+                    <div class="content hidden mt-4 text-slate-500 text-sm md:text-base leading-relaxed pl-4 border-l-2 border-emerald-500">
+                        Ya, SORTIQ dapat digunakan sepenuhnya gratis untuk pengguna individu/rumah tangga untuk mendukung gerakan lingkungan.
+                    </div>
+                </div>
+                <div class="border border-slate-200 p-5 md:p-6 rounded-2xl cursor-pointer hover:border-emerald-500 hover:shadow-lg transition duration-300 group bg-white" onclick="toggleFaq(this)" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-base md:text-lg group-hover:text-emerald-700 transition">Bagaimana cara menukar poin?</h4>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="ph-bold ph-caret-down group-hover:text-emerald-600 transition-transform duration-300"></i></div>
+                    </div>
+                    <div class="content hidden mt-4 text-slate-500 text-sm md:text-base leading-relaxed pl-4 border-l-2 border-emerald-500">
+                        Anda bisa menukar poin di menu Dashboard > Eco Market. Poin bisa ditukar menjadi saldo Gopay, voucher listrik, atau hadiah fisik.
+                    </div>
+                </div>
+                <div class="border border-slate-200 p-5 md:p-6 rounded-2xl cursor-pointer hover:border-emerald-500 hover:shadow-lg transition duration-300 group bg-white" onclick="toggleFaq(this)" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-base md:text-lg group-hover:text-emerald-700 transition">Apakah perlu instal?</h4>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 transition"><i class="ph-bold ph-caret-down group-hover:text-emerald-600 transition-transform duration-300"></i></div>
+                    </div>
+                    <div class="content hidden mt-4 text-slate-500 text-sm md:text-base leading-relaxed pl-4 border-l-2 border-emerald-500">
+                        Tidak perlu. SORTIQ adalah Web App yang bisa diakses langsung lewat browser (Chrome/Safari) tanpa membebani memori HP Anda.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Footer (RESPONSIF) -->
+    <footer id="kontak" class="bg-slate-900 text-white pt-16 md:pt-24 pb-8 md:pb-10 px-6 border-t border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500"></div>
+        <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-10 md:gap-12 border-b border-slate-800 pb-10 md:pb-12 relative z-10">
+            <div class="col-span-2" data-aos="fade-right">
+                <div class="flex items-center gap-3 mb-6">
+                    <img src="logo.png" 
+                         onerror="this.src='logo.jpg'" 
+                         alt="Logo" 
+                         class="w-10 h-10 object-contain bg-white rounded-lg p-1"> 
+                    <span class="text-2xl font-bold tracking-tight">SORTIQ</span>
+                </div>
+                <p class="text-slate-400 max-w-sm leading-relaxed mb-8 text-sm md:text-base">
+                    Platform cerdas untuk masa depan yang lebih bersih. Kami menggabungkan kepedulian lingkungan dengan teknologi masa depan.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 hover:scale-110 transition duration-300 text-slate-300 hover:text-white shadow-lg"><i class="ph-fill ph-instagram-logo text-xl"></i></a>
+                    <a href="#" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition duration-300 text-slate-300 hover:text-white shadow-lg"><i class="ph-fill ph-twitter-logo text-xl"></i></a>
+                    <a href="#" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition duration-300 text-slate-300 hover:text-white shadow-lg"><i class="ph-fill ph-linkedin-logo text-xl"></i></a>
+                </div>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <h4 class="font-bold text-base md:text-lg mb-4 md:mb-6 text-white border-b-2 border-emerald-500 inline-block pb-1">Navigasi</h4>
+                <ul class="space-y-3 md:space-y-4 text-slate-400 text-sm md:text-base">
+                    <li><a href="#beranda" class="hover:text-emerald-400 transition hover:pl-2 flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Beranda</a></li>
+                    <li><a href="#tentang" class="hover:text-emerald-400 transition hover:pl-2 flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tentang Kami</a></li>
+                    <li><a href="#fitur" class="hover:text-emerald-400 transition hover:pl-2 flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Fitur Unggulan</a></li>
+                    <li><a href="login.html" class="hover:text-emerald-400 transition hover:pl-2 flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Masuk Akun</a></li>
+                </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+                <h4 class="font-bold text-base md:text-lg mb-4 md:mb-6 text-white border-b-2 border-emerald-500 inline-block pb-1">Hubungi Kami</h4>
+                <ul class="space-y-3 md:space-y-4 text-slate-400 text-sm md:text-base">
+                    <li class="flex items-center gap-3 group bg-slate-800/50 p-2 md:p-3 rounded-xl hover:bg-slate-800 transition cursor-pointer"><i class="ph-fill ph-envelope-simple text-emerald-500 text-lg md:text-xl group-hover:scale-110 transition"></i> halo@sortiq.id</li>
+                    <li class="flex items-center gap-3 group bg-slate-800/50 p-2 md:p-3 rounded-xl hover:bg-slate-800 transition cursor-pointer"><i class="ph-fill ph-whatsapp-logo text-emerald-500 text-lg md:text-xl group-hover:scale-110 transition"></i> +62 812 3456 7890</li>
+                    <li class="flex items-center gap-3 group bg-slate-800/50 p-2 md:p-3 rounded-xl hover:bg-slate-800 transition cursor-pointer"><i class="ph-fill ph-map-pin text-emerald-500 text-lg md:text-xl group-hover:scale-110 transition"></i> Jakarta, Indonesia</li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto pt-8 text-center text-slate-600 text-xs md:text-sm flex flex-col md:flex-row justify-between items-center">
+            <p>&copy; 2026 SORTIQ Indonesia. All rights reserved.</p>
+            <p class="mt-2 md:mt-0 flex gap-4">
+                <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                <span class="text-slate-700">|</span>
+                <a href="#" class="hover:text-white transition">Terms of Service</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- === LOGIKA INTEGRASI FIREBASE (CEK SESI LOGIN) === -->
+    <script type="module">
+        import { auth, onAuthStateChanged } from './firebase-init.js';
+
+        // Cek jika user sudah login, arahkan ke dashboard yang sesuai
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (user.email === 'gregoriusolvans16@gmail.com') {
+                    window.location.href = 'dashboard-admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        });
+    </script>
+
+    <!-- Script Orisinal Anda -->
+    <script>
+        // Init AOS (Animate On Scroll)
+        AOS.init({
+            once: true, 
+            offset: 50, 
+            duration: 800, 
+            easing: 'ease-out-cubic',
+        });
+
+        // Efek Parallax Mouse pada Hero
+        function parallax(e) {
+            const heroSection = document.getElementById('beranda');
+            if (heroSection) {
+                heroSection.querySelectorAll('[data-speed]').forEach(layer => {
+                    const speed = layer.getAttribute('data-speed') || 1;
+                    const x = (window.innerWidth - e.pageX * speed) / 100;
+                    const y = (window.innerHeight - e.pageY * speed) / 100;
+                    layer.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                });
+            }
+        }
+
+        // Logic Ketikan (Typewriter)
+        var TxtType = function(el, toRotate, period) {
+            this.toRotate = toRotate; this.el = el; this.loopNum = 0; this.period = parseInt(period, 10) || 2000; this.txt = ''; this.tick(); this.isDeleting = false;
+        };
+        TxtType.prototype.tick = function() {
+            var i = this.loopNum % this.toRotate.length; var fullTxt = this.toRotate[i];
+            if (this.isDeleting) { this.txt = fullTxt.substring(0, this.txt.length - 1); } 
+            else { this.txt = fullTxt.substring(0, this.txt.length + 1); }
+            this.el.innerHTML = '<span class="wrap">'+this.txt+'</span>';
+            var that = this; var delta = 200 - Math.random() * 100;
+            if (this.isDeleting) { delta /= 2; }
+            if (!this.isDeleting && this.txt === fullTxt) { delta = this.period; this.isDeleting = true; } 
+            else if (this.isDeleting && this.txt === '') { this.isDeleting = false; this.loopNum++; delta = 500; }
+            setTimeout(function() { that.tick(); }, delta);
+        };
+        window.addEventListener('load', function() {
+            var elements = document.getElementsByClassName('typewrite');
+            for (var i=0; i<elements.length; i++) {
+                var toRotate = elements[i].getAttribute('data-type');
+                var period = elements[i].getAttribute('data-period');
+                if (toRotate) { new TxtType(elements[i], JSON.parse(toRotate), period); }
+            }
+            var css = document.createElement("style"); css.type = "text/css"; css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #10b981}"; document.body.appendChild(css);
+        });
+
+        // Animasi Angka (Counter)
+        setTimeout(() => {
+            if (typeof CountUp !== 'undefined') { 
+                const countUp = new countUp.CountUp('counter', 50);
+                if (!countUp.error) { countUp.start(); } else { console.error(countUp.error); }
+            } else { 
+                const el = document.getElementById('counter'); if(el) el.innerText = '50'; 
+            }
+        }, 1000);
+
+        // Slider Manual
+        function scrollSlider(direction) {
+            const container = document.getElementById('sliderTrack');
+            const scrollAmount = window.innerWidth < 768 ? window.innerWidth * 0.85 : 600; 
+            if (direction === 'left') { container.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); } 
+            else { container.scrollBy({ left: scrollAmount, behavior: 'smooth' }); }
+        }
+
+        // Auto Scroll Slider
+        setInterval(() => {
+            const container = document.getElementById('sliderTrack');
+            if (container) {
+                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) { container.scrollTo({ left: 0, behavior: 'smooth' }); } 
+                else { container.scrollBy({ left: 300, behavior: 'smooth' }); }
+            }
+        }, 4000);
+
+        // Toggle FAQ Accordion
+        function toggleFaq(el) { 
+            const content = el.querySelector('.content'); 
+            const icon = el.querySelector('i'); 
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+            icon.classList.toggle('rotate-180'); 
+        }
+
+        // Navbar Scroll Spy
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section, footer');
+            const navLinks = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(sec => {
+                    const sectionTop = sec.offsetTop;
+                    if (window.pageYOffset >= (sectionTop - 150)) { current = sec.getAttribute('id'); }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('nav-active');
+                    if (link.getAttribute('href').includes(current)) { link.classList.add('nav-active'); }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

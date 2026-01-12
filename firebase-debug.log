@@ -1,0 +1,63 @@
+[debug] [2026-01-11T23:27:53.430Z] ----------------------------------------------------------------------
+[debug] [2026-01-11T23:27:53.444Z] Command:       C:\Program Files (x86)\nodejs\node.exe C:\Users\ADVAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-01-11T23:27:53.444Z] CLI Version:   15.2.1
+[debug] [2026-01-11T23:27:53.444Z] Platform:      win32
+[debug] [2026-01-11T23:27:53.445Z] Node Version:  v22.9.0
+[debug] [2026-01-11T23:27:53.446Z] Time:          Mon Jan 12 2026 06:27:53 GMT+0700 (Waktu Indonesia Barat)
+[debug] [2026-01-11T23:27:53.446Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-11T23:27:53.449Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-01-11T23:27:57.350Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-11T23:27:57.350Z] > authorizing via signed-in user (gregoriusolvans16@gmail.com)
+[debug] [2026-01-11T23:27:57.350Z] [iam] checking project sortiq-a9449 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-01-11T23:27:57.351Z] Checked if tokens are valid: false, expires at: 1768146003016
+[debug] [2026-01-11T23:27:57.351Z] Checked if tokens are valid: false, expires at: 1768146003016
+[debug] [2026-01-11T23:27:57.352Z] > refreshing access token with scopes: []
+[debug] [2026-01-11T23:27:57.353Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-11T23:27:57.353Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-11T23:27:57.514Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-01-11T23:27:57.514Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-11T23:27:57.525Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions [none]
+[debug] [2026-01-11T23:27:57.525Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions x-goog-quota-user=projects/sortiq-a9449
+[debug] [2026-01-11T23:27:57.525Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-11T23:28:03.766Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions 200
+[debug] [2026-01-11T23:28:03.766Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-11T23:28:03.767Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:28:03.767Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:28:03.767Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 [none]
+[debug] [2026-01-11T23:28:05.576Z] *** [apiv2] error from fetch(https://firebase-public.firebaseio.com/cli.json, {"headers":{},"method":"GET"}): FetchError: request to https://firebase-public.firebaseio.com/cli.json failed, reason: getaddrinfo ENOTFOUND firebase-public.firebaseio.com
+[warn] !  Unable to fetch the CLI MOTD and remote config. This is not a fatal error, but may indicate an issue with your network connection. 
+[debug] [2026-01-11T23:28:05.577Z] Failed to fetch MOTD FirebaseError: Failed to make request to https://firebase-public.firebaseio.com/cli.json
+[debug] [2026-01-11T23:28:15.807Z] *** [apiv2] error from fetch(https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449, {"headers":{},"method":"GET","signal":{"reason":""}}): FetchError: request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 failed, reason: getaddrinfo ENOTFOUND firebase.googleapis.com
+[debug] [2026-01-11T23:28:15.808Z] Failed to make request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 (original: request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 failed, reason: getaddrinfo ENOTFOUND firebase.googleapis.com)
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2026-01-11T23:34:39.914Z] ----------------------------------------------------------------------
+[debug] [2026-01-11T23:34:39.921Z] Command:       C:\Program Files (x86)\nodejs\node.exe C:\Users\ADVAN\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-01-11T23:34:39.922Z] CLI Version:   15.2.1
+[debug] [2026-01-11T23:34:39.922Z] Platform:      win32
+[debug] [2026-01-11T23:34:39.922Z] Node Version:  v22.9.0
+[debug] [2026-01-11T23:34:39.923Z] Time:          Mon Jan 12 2026 06:34:39 GMT+0700 (Waktu Indonesia Barat)
+[debug] [2026-01-11T23:34:39.923Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-11T23:34:39.927Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-01-11T23:34:42.421Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-11T23:34:42.421Z] > authorizing via signed-in user (gregoriusolvans16@gmail.com)
+[debug] [2026-01-11T23:34:42.421Z] [iam] checking project sortiq-a9449 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-01-11T23:34:42.422Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:34:42.422Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:34:42.422Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions [none]
+[debug] [2026-01-11T23:34:42.423Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions x-goog-quota-user=projects/sortiq-a9449
+[debug] [2026-01-11T23:34:42.423Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-01-11T23:34:52.075Z] *** [apiv2] error from fetch(https://firebase-public.firebaseio.com/cli.json, {"headers":{},"method":"GET"}): FetchError: request to https://firebase-public.firebaseio.com/cli.json failed, reason: getaddrinfo ENOTFOUND firebase-public.firebaseio.com
+[warn] !  Unable to fetch the CLI MOTD and remote config. This is not a fatal error, but may indicate an issue with your network connection. 
+[debug] [2026-01-11T23:34:52.076Z] Failed to fetch MOTD FirebaseError: Failed to make request to https://firebase-public.firebaseio.com/cli.json
+[debug] [2026-01-11T23:34:54.449Z] *** [apiv2] error from fetch(https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions, {"headers":{},"method":"POST","body":"{\"permissions\":[\"firebase.projects.get\",\"firebasehosting.sites.update\"]}"}): FetchError: request to https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions failed, reason: getaddrinfo ENOTFOUND cloudresourcemanager.googleapis.com
+[debug] [2026-01-11T23:34:54.450Z] [iam] error while checking permissions, command may fail: Failed to make request to https://cloudresourcemanager.googleapis.com/v1/projects/sortiq-a9449:testIamPermissions
+[debug] [2026-01-11T23:34:54.450Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:34:54.451Z] Checked if tokens are valid: true, expires at: 1768177676514
+[debug] [2026-01-11T23:34:54.451Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 [none]
+[debug] [2026-01-11T23:35:06.494Z] *** [apiv2] error from fetch(https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449, {"headers":{},"method":"GET","signal":{"reason":""}}): FetchError: request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 failed, reason: getaddrinfo ENOTFOUND firebase.googleapis.com
+[debug] [2026-01-11T23:35:06.495Z] Failed to make request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 (original: request to https://firebase.googleapis.com/v1beta1/projects/sortiq-a9449 failed, reason: getaddrinfo ENOTFOUND firebase.googleapis.com)
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier

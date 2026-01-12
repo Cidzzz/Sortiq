@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort - Manajemen Sampah Pintar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+        }
+        .category-card:hover .hover-detail {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hover-detail {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-800">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- HEADER: Hero Section -->
+        <header class="glass-card rounded-3xl p-8 md:p-10 relative overflow-hidden">
+            <!-- Global Status tetap ada sebagai informasi umum -->
+            <div class="absolute top-0 right-0 p-6">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                    Informasi Sampah
+                </span>
+            </div>
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="space-y-2">
+                    <p class="text-slate-500 font-medium uppercase tracking-wider text-sm">Akumulasi Sampah Anda</p>
+                    <h1 class="text-6xl font-bold text-slate-900">14,5 <span class="text-3xl font-normal text-slate-400">kg</span></h1>
+                </div>
+                
+                <div class="bg-emerald-600 text-white p-6 rounded-2xl shadow-lg shadow-emerald-200/50 flex flex-col items-start gap-1">
+                    <p class="text-emerald-100 text-sm">Potensi Saldo (Estimasi)</p>
+                    <p class="text-3xl font-bold">Rp 45.000</p>
+                    <p class="text-[10px] bg-emerald-500 px-2 py-1 rounded mt-2">+5.2% dari minggu lalu</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- LEFT: Breakdown Kategori -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-xl font-bold text-slate-800">Breakdown Kategori</h2>
+                    <button class="text-blue-600 text-sm font-semibold flex items-center hover:underline">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-1"></i> Ekspor ke Spreadsheet
+                    </button>
+                </div>
+
+                <div class="grid gap-4" id="category-container">
+                    <!-- Cards dinamis via JavaScript -->
+                </div>
+            </div>
+
+            <!-- RIGHT: Market Watch -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-slate-800">Market Watch</h2>
+                
+                <div class="glass-card rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold">Harga Plastik Hari Ini</span>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">+5%</span>
+                    </div>
+                    <canvas id="marketChart" height="100"></canvas>
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <div class="flex gap-3">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-500 shrink-0"></i>
+                            <p class="text-xs text-blue-700 leading-relaxed">
+                                <strong>Info:</strong> Harga Plastik PET naik hari ini. Waktu terbaik untuk melakukan penyetoran!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
+                        <i data-lucide="award"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Eco Level</p>
+                        <p class="text-sm font-bold">Pejuang Lingkungan (Silver)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA SECTION -->
+        <div class="pt-8">
+            <button class="w-full bg-white border-2 border-slate-200 hover:border-blue-400 text-slate-700 font-bold py-5 px-8 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-sm hover:shadow-md">
+                <i data-lucide="map-pin" class="w-6 h-6 text-blue-500"></i>
+                Lihat Lokasi Dropbox Terdekat
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const categories = [
+            {
+                name: 'Plastik',
+                weight: 6.2,
+                price: 3500,
+                minWeight: 5,
+                color: '#2DCC70',
+                lightColor: 'bg-emerald-50',
+                textColor: 'text-emerald-600',
+                details: 'PET, HDPE, LDPE, PP',
+                icon: 'recycle'
+            },
+            {
+                name: 'Kertas',
+                weight: 4.1,
+                price: 2000,
+                minWeight: 5,
+                color: '#3498DB',
+                lightColor: 'bg-blue-50',
+                textColor: 'text-blue-600',
+                details: 'Koran, Karton, HVS',
+                icon: 'file-text'
+            },
+            {
+                name: 'Organik',
+                weight: 4.2,
+                price: 1500,
+                minWeight: 2,
+                color: '#8B4513',
+                lightColor: 'bg-orange-50',
+                textColor: 'text-orange-700',
+                details: 'Sisa Makanan, Daun',
+                icon: 'leaf'
+            }
+        ];
+
+        function renderCategories() {
+            const container = document.getElementById('category-container');
+            container.innerHTML = categories.map(cat => {
+                const progress = Math.min((cat.weight / cat.minWeight) * 100, 100);
+                const value = cat.weight * cat.price;
+                
+                return `
+                    <div class="category-card glass-card rounded-2xl p-6 relative group transition-all hover:scale-[1.01]">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center ${cat.lightColor} ${cat.textColor}">
+                                    <i data-lucide="${cat.icon}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">${cat.name}</h3>
+                                    <p class="text-xs text-slate-400">Harga Pasar: Rp ${cat.price.toLocaleString()}/kg</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold ${cat.textColor}">Rp ${value.toLocaleString()}</p>
+                                <p class="text-xs font-medium text-slate-500">${cat.weight} kg</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Section (Tanpa Label Siap Disetor/Menunggu) -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                <span>Progress Pengumpulan</span>
+                                <span>${cat.weight} / ${cat.minWeight} kg</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="progress-bar-fill h-full rounded-full" 
+                                     style="width: ${progress}%; background-color: ${cat.color}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Hover Details -->
+                        <div class="hover-detail absolute inset-0 bg-white/95 rounded-2xl flex flex-col justify-center items-center text-center p-6 z-10 pointer-events-none opacity-0">
+                            <h4 class="font-bold mb-2">Jenis ${cat.name} yang Diterima:</h4>
+                            <p class="text-sm text-slate-600 mb-4">${cat.details}</p>
+                            <span class="text-[10px] font-bold text-emerald-600 uppercase">Informasi Pemilahan</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('marketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{
+                        label: 'Harga Plastik',
+                        data: [3100, 3150, 3100, 3300, 3400, 3450, 3500],
+                        borderColor: '#2DCC70',
+                        backgroundColor: 'rgba(45, 204, 112, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            renderCategories();
+            initChart();
+        };
+    </script>
+</body>
+</html>
