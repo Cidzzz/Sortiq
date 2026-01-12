@@ -221,9 +221,12 @@
                     <span class="ml-auto bg-emerald-100 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full">New</span>
                 </button>
             </nav>
-            <button onclick="if(confirm('Apakah Anda yakin ingin keluar?')) window.location.href='index.html'" class="w-full flex items-center gap-3 text-red-500 font-bold text-sm hover:bg-red-50 p-4 rounded-2xl transition group">
-                <i class="ph-bold ph-sign-out text-xl group-hover:-translate-x-1 transition"></i> Keluar Akun
-            </button>
+
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="if(confirm('Apakah Anda yakin ingin keluar?')) window.location.href='index.html'" class="w-full flex items-center gap-3 text-red-500 font-bold text-sm hover:bg-red-50 p-4 rounded-2xl transition group">
+                    <i class="ph-bold ph-sign-out text-xl group-hover:-translate-x-1 transition"></i> Keluar Akun
+                </button>
+            </div>
         </aside>
 
         <!-- === MAIN CONTENT === -->
@@ -375,8 +378,7 @@
                             </button>
                         </div>
 
-                        <!-- Card 4: Streak Aktivitas -->
-                        <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between h-full relative group">
+<div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between h-full relative group">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xl shadow-sm">
@@ -396,26 +398,19 @@
                                     <p class="text-[10px] font-bold text-orange-700">🏆 3 hari → <span class="font-black">+10 XP</span></p>
                                 </div>
                             </div>
-                            <!-- BUTTON LINK UPDATE -->
                             <button onclick="window.location.href='scan.html'" class="mt-4 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 group-hover:bg-orange-500 group-hover:text-white">
                                 Scan Sekarang <i class="ph-bold ph-camera"></i>
                             </button>
                         </div>
-
-                    </div>
-
-                    <!-- RIWAYAT SETORAN (Realtime Data) -->
-                    <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                    </div> <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
                                 <i class="ph-fill ph-clock-counter-clockwise text-emerald-500"></i> Setoran Terakhir
                             </h3>
-                            <!-- Indikator max 2 item -->
                             <span x-show="userHistory.length > 0" class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-full uppercase tracking-wider">Terbaru</span>
                         </div>
                         
                         <div class="space-y-3">
-                            <!-- Loop dengan slice(0, 2) untuk max 2 item -->
                             <template x-for="item in userHistory.slice(0, 2)" :key="item.id">
                                 <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition duration-200">
                                     <div class="flex items-center gap-4">
@@ -443,144 +438,133 @@
                                 </div>
                             </template>
                             
-                            <!-- Empty State -->
                             <div x-show="userHistory.length === 0" class="text-center py-8 text-slate-400 text-xs italic">
                                 Belum ada riwayat setoran. Ayo mulai setor sampah!
                             </div>
 
-                            <!-- CTA Button (Tampil jika ada history) -->
                             <button x-show="userHistory.length > 0" @click="setPage('history')" class="w-full mt-2 py-3.5 bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 group border border-transparent hover:border-emerald-200">
-                            <span>Lihat Semua Riwayat</span>
-                            <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </button>
-                    </div>
-                </div> 
-            </div> 
-            <div x-show="currentPage === 'bag'" x-transition.opacity.duration.300ms class="space-y-6 max-w-6xl mx-auto">
-               <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row justify-between items-end gap-6">
-    
-    <div class="relative z-10 w-full md:w-auto">
-        <button @click="setPage('home')" class="group flex items-center gap-2 text-slate-400 hover:text-slate-800 text-sm font-bold mb-6 transition-colors">
-            <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> 
-            Kembali
-        </button>
-        
-        <div class="space-y-1">
-            <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Total Akumulasi</p>
-            <div class="flex items-baseline gap-1">
-                <h1 class="text-7xl md:text-8xl font-black text-slate-800 tracking-tighter" x-text="trashBag.weight"></h1>
-                <span class="text-3xl font-bold text-slate-300">kg</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="relative z-10 w-full md:w-auto flex flex-col items-end gap-4">
-        
-        <div class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Live Update</span>
-        </div>
-
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl shadow-emerald-200/50 w-full md:w-64 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
-            
-            <div class="relative z-10">
-                <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-widest mb-1">Estimasi Reward</p>
-                <div class="flex items-baseline gap-1 mb-3">
-                    <span class="text-lg font-medium text-emerald-200">+</span>
-                    <h2 class="text-5xl font-black tracking-tight" x-text="trashBag.potentialXP"></h2>
-                    <span class="text-sm font-bold text-emerald-100">XP</span>
-                </div>
-                <div class="inline-block bg-white/20 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-lg">
-                    <p class="text-[10px] font-bold text-white flex items-center gap-1">
-                        <i class="ph-bold ph-trend-up"></i> +5.2% value minggu ini
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="flex items-center justify-between px-2">
-                            <h2 class="text-xl font-bold text-slate-800">Breakdown Kategori</h2>
-                            <button class="text-blue-600 text-sm font-bold flex items-center hover:bg-blue-50 px-3 py-1 rounded-lg transition">
-                                <i class="ph-bold ph-file-xls mr-2"></i> Ekspor Data
+                                <span>Lihat Semua Riwayat</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </button>
                         </div>
+                    </div>
+                </div> <div x-show="currentPage === 'bag'" x-transition.opacity.duration.300ms class="space-y-6 max-w-6xl mx-auto">
+                    <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row justify-between items-end gap-6">
+                        <div class="relative z-10 w-full md:w-auto">
+                            <button @click="setPage('home')" class="group flex items-center gap-2 text-slate-400 hover:text-slate-800 text-sm font-bold mb-6 transition-colors">
+                                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
+                            </button>
+                            
+                            <div class="space-y-1">
+                                <p class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Total Akumulasi</p>
+                                <div class="flex items-baseline gap-1">
+                                    <h1 class="text-7xl md:text-8xl font-black text-slate-800 tracking-tighter" x-text="trashBag.weight"></h1>
+                                    <span class="text-3xl font-bold text-slate-300">kg</span>
+                                </div>
+                            </div>
+                        </div>
 
-                        <div class="space-y-4">
-                            <template x-for="cat in trashCategories" :key="cat.name">
-                                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition duration-300 relative group overflow-hidden">
-                                    <div class="flex items-start justify-between mb-4 relative z-10">
-                                        <div class="flex items-center gap-4">
-                                            <div :class="cat.lightColor + ' ' + cat.textColor" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">
-                                                <i :class="cat.icon"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="font-bold text-lg text-slate-800" x-text="cat.name"></h3>
-                                                <p class="text-xs text-slate-400 font-medium">Pasar: <span x-text="cat.price"></span></p>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <p :class="cat.textColor" class="text-lg font-black" x-text="(trashBag.weight * cat.ratio).toFixed(1) + ' kg'"></p>
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase">Estimasi Berat</p>
-                                        </div>
+                        <div class="relative z-10 w-full md:w-auto flex flex-col items-end gap-4">
+                            <div class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+                                <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">Live Update</span>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-6 md:p-8 rounded-[2rem] shadow-xl shadow-emerald-200/50 w-full md:w-64 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+                                <div class="relative z-10">
+                                    <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-widest mb-1">Estimasi Reward</p>
+                                    <div class="flex items-baseline gap-1 mb-3">
+                                        <span class="text-lg font-medium text-emerald-200">+</span>
+                                        <h2 class="text-5xl font-black tracking-tight" x-text="trashBag.potentialXP"></h2>
+                                        <span class="text-sm font-bold text-emerald-100">XP</span>
                                     </div>
-                                    <div class="space-y-2 relative z-10">
-                                        <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                                            <span>Kapasitas Kantong</span>
-                                            <span x-text="Math.round((trashBag.weight * cat.ratio / 10) * 100) + '%'"></span>
-                                        </div>
-                                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                                            <div class="h-full rounded-full transition-all duration-1000 ease-out" 
-                                                    :style="`width: ${(trashBag.weight * cat.ratio / 10) * 100}%; background-color: ${cat.hexColor}`"></div>
-                                        </div>
+                                    <div class="inline-block bg-white/20 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-lg">
+                                        <p class="text-[10px] font-bold text-white flex items-center gap-1">
+                                            <i class="ph-bold ph-trend-up"></i> +5.2% value minggu ini
+                                        </p>
                                     </div>
                                 </div>
-                            </template>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <h2 class="text-xl font-bold text-slate-800">Market Watch</h2>
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-sm font-bold text-slate-600">Tren Harga Plastik</span>
-                                <span class="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+5%</span>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="flex items-center justify-between px-2">
+                                <h2 class="text-xl font-bold text-slate-800">Breakdown Kategori</h2>
+                                <button class="text-blue-600 text-sm font-bold flex items-center hover:bg-blue-50 px-3 py-1 rounded-lg transition">
+                                    <i class="ph-bold ph-file-xls mr-2"></i> Ekspor Data
+                                </button>
                             </div>
-                            <div class="h-32 w-full">
-                                <canvas id="marketChartDetail"></canvas>
-                            </div>
-                            <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mt-4 flex gap-3">
-                                <i class="ph-fill ph-info text-blue-500 text-xl shrink-0"></i>
-                                <p class="text-xs text-blue-700 font-medium leading-relaxed">
-                                    <strong>Info:</strong> Harga Plastik PET sedang naik. Waktu yang tepat untuk setor!
-                                </p>
+
+                            <div class="space-y-4">
+                                <template x-for="cat in trashCategories" :key="cat.name">
+                                    <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition duration-300 relative group overflow-hidden">
+                                        <div class="flex items-start justify-between mb-4 relative z-10">
+                                            <div class="flex items-center gap-4">
+                                                <div :class="cat.lightColor + ' ' + cat.textColor" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl">
+                                                    <i :class="cat.icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-lg text-slate-800" x-text="cat.name"></h3>
+                                                    <p class="text-xs text-slate-400 font-medium">Pasar: <span x-text="cat.price"></span></p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p :class="cat.textColor" class="text-lg font-black" x-text="(trashBag.weight * cat.ratio).toFixed(1) + ' kg'"></p>
+                                                <p class="text-[10px] font-bold text-slate-400 uppercase">Estimasi Berat</p>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2 relative z-10">
+                                            <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                                <span>Kapasitas Kantong</span>
+                                                <span x-text="Math.round((trashBag.weight * cat.ratio / 10) * 100) + '%'"></span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                                                <div class="h-full rounded-full transition-all duration-1000 ease-out" 
+                                                     :style="`width: ${(trashBag.weight * cat.ratio / 10) * 100}%; background-color: ${cat.hexColor}`"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
-                        <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex items-center gap-4">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 text-2xl"><i class="ph-fill ph-medal"></i></div>
-                            <div>
-                                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Eco Level</p>
-                                <p class="text-sm font-black text-slate-800">Pejuang Lingkungan</p>
+                        <div class="space-y-6">
+                            <h2 class="text-xl font-bold text-slate-800">Market Watch</h2>
+                            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-sm font-bold text-slate-600">Tren Harga Plastik</span>
+                                    <span class="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+5%</span>
+                                </div>
+                                <div class="h-32 w-full">
+                                    <canvas id="marketChartDetail"></canvas>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 mt-4 flex gap-3">
+                                    <i class="ph-fill ph-info text-blue-500 text-xl shrink-0"></i>
+                                    <p class="text-xs text-blue-700 font-medium leading-relaxed">
+                                        <strong>Info:</strong> Harga Plastik PET sedang naik. Waktu yang tepat untuk setor!
+                                    </p>
+                                </div>
                             </div>
+
+                            <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex items-center gap-4">
+                                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 text-2xl"><i class="ph-fill ph-medal"></i></div>
+                                <div>
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Eco Level</p>
+                                    <p class="text-sm font-black text-slate-800">Pejuang Lingkungan</p>
+                                </div>
+                            </div>
+                             <button @click="setPage('tpa')" class="w-full bg-slate-800 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-95">
+                                <i class="ph-bold ph-map-pin"></i> Cari Dropbox Terdekat
+                            </button>
                         </div>
-                            <button @click="setPage('tpa')" class="w-full bg-slate-800 hover:bg-emerald-600 text-white font-bold py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg active:scale-95">
-                            <i class="ph-bold ph-map-pin"></i> Cari Dropbox Terdekat
-                        </button>
                     </div>
                 </div>
-            </div>
-
-            <div x-show="currentPage === 'tpa'" x-transition.opacity.duration.300ms class="h-full flex flex-col md:flex-row gap-6 max-w-7xl mx-auto">
-
-                <!-- 2. LOKASI SETOR VIEW -->
                 <div x-show="currentPage === 'tpa'" x-transition.opacity.duration.300ms class="h-full flex flex-col md:flex-row gap-6 max-w-7xl mx-auto">
                     <div class="w-full md:w-80 flex flex-col gap-4">
                         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
@@ -943,23 +927,21 @@
                 depositData: { address: '' },
                 userHistory: [], 
                 marketOrders: [], // NEW
+
                 trashCategories: [
-                        { name: 'Plastik (PET/HDPE)', ratio: 0.45, price: 'Rp 3.500/kg', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600', hexColor: '#10b981', icon: 'ph-bold ph-recycle' },
-                        { name: 'Kertas & Karton', ratio: 0.30, price: 'Rp 2.000/kg', lightColor: 'bg-blue-50', textColor: 'text-blue-600', hexColor: '#3b82f6', icon: 'ph-bold ph-file-text' },
-                        { name: 'Organik & Lainnya', ratio: 0.25, price: 'Rp 1.500/kg', lightColor: 'bg-orange-50', textColor: 'text-orange-600', hexColor: '#f97316', icon: 'ph-bold ph-leaf' }
-                    ],
-                    chartInstance: null,
-                    // ----------------------------------------
-
-                    navItems: [
-                        { id: 'home', label: 'Dashboard', icon: 'ph-bold ph-squares-four' },
-                        { id: 'tpa', label: 'Lokasi Setor', icon: 'ph-bold ph-map-trifold' },
-                        { id: 'bot', label: 'Tanya AI', icon: 'ph-bold ph-robot' },
-                        { id: 'market', label: 'Eco Market', icon: 'ph-bold ph-storefront' },
-                        { id: 'orders', label: 'Riwayat Belanja', icon: 'ph-bold ph-receipt' }
-                    ],
-
-                    
+    { name: 'Plastik (PET/HDPE)', ratio: 0.45, price: 'Rp 3.500/kg', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600', hexColor: '#10b981', icon: 'ph-bold ph-recycle' },
+    { name: 'Kertas & Karton', ratio: 0.30, price: 'Rp 2.000/kg', lightColor: 'bg-blue-50', textColor: 'text-blue-600', hexColor: '#3b82f6', icon: 'ph-bold ph-file-text' },
+    { name: 'Organik & Lainnya', ratio: 0.25, price: 'Rp 1.500/kg', lightColor: 'bg-orange-50', textColor: 'text-orange-600', hexColor: '#f97316', icon: 'ph-bold ph-leaf' }
+],
+chartInstance: null,
+                
+                navItems: [
+                    { id: 'home', label: 'Dashboard', icon: 'ph-bold ph-squares-four' },
+                    { id: 'tpa', label: 'Lokasi Setor', icon: 'ph-bold ph-map-trifold' },
+                    { id: 'bot', label: 'Tanya AI', icon: 'ph-bold ph-robot' },
+                    { id: 'market', label: 'Eco Market', icon: 'ph-bold ph-storefront' },
+                    { id: 'orders', label: 'Riwayat Belanja', icon: 'ph-bold ph-receipt' } // UPDATED
+                ],
 
                 selectedTpaId: 1, 
                 tpaSearch: '',
@@ -977,16 +959,6 @@
                     { id: 3, name: 'Starter Kit Kompos', desc: 'Alat komposting rumah.', cost: 'Rp 150.000', type: 'money', category: 'shop', priceValue: 150000, bgClass: 'bg-orange-50 text-orange-500', icon: 'ph-duotone ph-recycle' },
                     { id: 4, name: 'Totebag Kanvas', desc: 'Pengganti kresek.', cost: 'Rp 25.000', type: 'money', category: 'shop', priceValue: 25000, bgClass: 'bg-purple-50 text-purple-500', icon: 'ph-duotone ph-bag' }
                 ],
-
-                logout() {
-        if (confirm('Apakah Anda yakin ingin keluar dari akun?')) {
-            // Hapus data sesi sementara (opsional)
-            localStorage.removeItem('sortiq_trashbag');
-            
-            // Redirect ke halaman beranda (sesuaikan 'index.html' dengan nama file utamamu)
-            window.location.href = 'index.html'; 
-        }
-    },
 
                 chatMessages: [],
                 chatInput: '',
@@ -1156,7 +1128,6 @@
                         }, 3000);
                     }
                 },
-                
 
                 closePayment() { this.showPaymentModal = false; this.selectedItem = null; this.paymentStep = 1; },
                 
@@ -1179,8 +1150,6 @@
                         tpaName: this.selectedTpa.nama
                     });
 
-                    
-
                     if(success) {
                         setTimeout(() => this.depositStep = 3, 1500); 
                         setTimeout(() => {
@@ -1191,11 +1160,8 @@
                     } else {
                         alert("Gagal mengirim data ke server.");
                         this.showDepositModal = false;
-                        
                     }
-                    
                 }
-                
             }));
         });
     </script>
