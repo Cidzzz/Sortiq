@@ -93,8 +93,8 @@
                       const newXP = currentXP - orderData.priceValue;
                       if (newXP < 0) return false;
                       try {
-                         const userDocRef = doc(db, 'artifacts', appId, 'users', userUid, 'profile', 'data');
-                         await updateDoc(userDocRef, { xp: newXP });
+                          const userDocRef = doc(db, 'artifacts', appId, 'users', userUid, 'profile', 'data');
+                          await updateDoc(userDocRef, { xp: newXP });
                       } catch(e) { return false; }
                 }
                 try {
@@ -216,8 +216,8 @@
             </header>
 
             <!-- Scrollable Content -->
-            <!-- pb-40 digunakan untuk memastikan konten paling bawah tidak tertutup nav bar mobile -->
-            <div class="flex-1 overflow-y-auto p-5 md:p-10 pb-40 md:pb-10 scroll-smooth" id="main-scroll">
+            <!-- FIX: Menggunakan pb-32 (128px) untuk padding bawah yang pas, tidak terlalu mepet dan tidak berlebihan -->
+            <div class="flex-1 overflow-y-auto p-5 md:p-10 pb-32 md:pb-10 scroll-smooth" id="main-scroll">
                 
                 <!-- 1. HOME VIEW -->
                 <div x-show="currentPage === 'home'" x-transition.opacity.duration.300ms class="space-y-6 md:space-y-8 max-w-6xl mx-auto">
@@ -500,7 +500,8 @@
                         </template>
                         <div x-show="isTyping" class="flex justify-start"><div class="bg-white border border-slate-200 px-4 py-3 rounded-2xl rounded-tl-sm text-xs text-slate-400 font-bold tracking-wide">Mengetik...</div></div>
                     </div>
-                    <div class="p-4 bg-white border-t border-slate-100 shrink-0 mb-safe">
+                    <!-- FIX: Menambahkan mb-24 pada form chat agar input tidak tertutup navigasi di mobile -->
+                    <div class="p-4 bg-white border-t border-slate-100 shrink-0 mb-24 md:mb-0">
                         <form @submit.prevent="sendMessage" class="flex gap-2">
                             <input type="text" x-model="chatInput" placeholder="Ketik pesan..." class="flex-1 bg-slate-100 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition">
                             <button type="submit" :disabled="!chatInput" class="bg-slate-900 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg active:scale-95 disabled:opacity-50 transition"><i class="ph-bold ph-paper-plane-right"></i></button>
