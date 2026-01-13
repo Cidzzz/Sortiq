@@ -56,7 +56,7 @@ Asisten virtual (Chatbot) untuk membantu pengguna yang memiliki pertanyaan spesi
 2.  Reza Putra Irawan
 3.  Aucky Faralya Biqlist
 4.  Agung Dwi Saputra
-
+5. Aditya Pratama Putra
 ---
 
 **Dibuat untuk Dinacom 11.0 - 2026**
