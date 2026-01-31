@@ -2,149 +2,316 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Masuk - SORTIQ</title>
-    <!-- Libraries -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SORTIQ - Masuk atau Daftar</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="logo.png?v=2">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
-</head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 md:p-6" x-data="authApp">
+    <!-- EMAILJS LIBRARY (WAJIB UNTUK OTP ASLI) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
-    <div class="bg-white w-full max-w-md p-6 md:p-8 rounded-3xl shadow-xl border border-slate-100 relative overflow-hidden">
-        <!-- Tombol Kembali -->
-        <a href="beranda.html" class="absolute top-5 right-5 text-slate-400 hover:text-slate-800 transition p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg>
-        </a>
-        
-        <div class="text-center mb-6 md:mb-8 mt-2">
-            <!-- Logo Anda -->
-            <img src="logo.png" onerror="this.src='https://placehold.co/80x80/10b981/ffffff?text=S'" class="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 object-contain">
-            <h1 class="text-xl md:text-2xl font-bold text-slate-800" x-text="isLogin ? 'Selamat Datang' : 'Buat Akun Baru'"></h1>
-            <p class="text-slate-500 text-xs md:text-sm mt-1" x-text="isLogin ? 'Masuk untuk mulai memilah sampah.' : 'Gabung komunitas SORTIQ sekarang.'"></p>
-        </div>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen w-full overflow-hidden" x-data="authApp">
 
-        <!-- Notifikasi Pesan Error -->
-        <div x-show="errorMsg" x-transition class="bg-red-50 text-red-600 text-xs p-3 rounded-xl mb-4 text-center font-bold border border-red-100" x-text="errorMsg"></div>
+    <!-- BACKGROUND ART -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-400/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[120px]"></div>
+    </div>
 
-        <form @submit.prevent="submitAuth" class="space-y-3 md:space-y-4">
+    <!-- === MODAL OTP (DENGAN FALLBACK UI) === -->
+    <div x-show="showOtpModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/90 backdrop-blur-md" x-cloak>
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl text-center max-w-sm w-full border border-white/20 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
             
-            <!-- Input Nama (Muncul hanya saat Daftar) -->
-            <div x-show="!isLogin" x-transition>
-                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
-                <input type="text" x-model="form.name" placeholder="Nama Kamu" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
-            </div>
-
-            <div>
-                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Email</label>
-                <input type="email" x-model="form.email" required placeholder="user@sortiq.id" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
+            <div class="w-20 h-20 mx-auto bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+                <i class="ph-duotone ph-envelope-open text-5xl text-emerald-500"></i>
             </div>
             
-            <div>
-                <label class="block text-xs md:text-sm font-bold text-slate-700 mb-1">Password</label>
-                <input type="password" x-model="form.password" required placeholder="••••••••" class="w-full px-4 py-2.5 md:py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm md:text-base transition">
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Verifikasi Email</h2>
+            <p class="text-slate-500 text-sm mb-4 leading-relaxed">
+                Demi keamanan, masukkan kode OTP 6-digit yang kami kirim ke <b x-text="email" class="text-emerald-600"></b>.
+            </p>
+
+            <!-- FALLBACK MESSAGE (Muncul HANYA jika email gagal terkirim / kuota habis) -->
+            <div x-show="otpFallbackCode" class="mb-4 bg-orange-50 border border-orange-200 rounded-xl p-3 text-left animate-pulse">
+                <p class="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-1">Mode Simulasi / Error</p>
+                <p class="text-xs text-orange-700">Email tidak terkirim (Cek Kuota API). Gunakan kode ini:</p>
+                <p class="text-xl font-black text-orange-800 mt-1 select-all font-mono text-center" x-text="otpFallbackCode"></p>
             </div>
 
-            <button type="submit" :disabled="isLoading" class="w-full bg-slate-900 text-white py-3 md:py-3.5 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition active:scale-95 text-sm md:text-base mt-2 flex justify-center items-center gap-2">
-                <span x-show="isLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span x-text="isLogin ? 'Masuk Sekarang' : 'Daftar Akun'"></span>
+            <div class="mb-6">
+                <input type="text" x-model="otpInput" maxlength="6" placeholder="######" class="w-full text-center text-3xl font-mono font-bold tracking-[0.5em] py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:ring-0 outline-none text-slate-800 placeholder-slate-300 transition-colors">
+            </div>
+
+            <button @click="verifyOtp()" :disabled="otpLoading" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 mb-4">
+                <span x-show="!otpLoading">Verifikasi Akun</span>
+                <i x-show="otpLoading" class="ph-bold ph-spinner animate-spin"></i>
             </button>
-        </form>
-
-        <div class="mt-6 text-center text-xs md:text-sm text-slate-500">
-            <span x-text="isLogin ? 'Belum punya akun?' : 'Sudah punya akun?'"></span> 
-            <button @click="isLogin = !isLogin; errorMsg = ''" class="text-emerald-600 font-bold hover:underline ml-1" x-text="isLogin ? 'Daftar' : 'Masuk'"></button>
+            
+            <button @click="resendOtp()" class="text-xs font-bold text-slate-400 hover:text-emerald-600 transition underline">
+                Belum terima? Kirim Ulang
+            </button>
         </div>
     </div>
 
-    <!-- === LOGIKA BACKEND FIREBASE (PENGGANTI LOCALSTORAGE) === -->
+    <!-- MAIN CONTAINER -->
+    <div class="relative z-10 flex h-full items-center justify-center p-4">
+        <div class="bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl rounded-[2.5rem] w-full max-w-5xl h-[85vh] flex overflow-hidden relative">
+            
+            <!-- LEFT SIDE -->
+            <div class="hidden md:flex w-1/2 bg-emerald-900 relative items-center justify-center p-12 text-white overflow-hidden group">
+                <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-105 transition duration-1000"></div>
+                <div class="relative z-10 text-center">
+                    <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/20 shadow-xl">
+                        <i class="ph-fill ph-recycle text-5xl text-emerald-300"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-4 tracking-tight">Jaga Bumi,<br>Dapat Cuan.</h2>
+                    <p class="text-emerald-100/80 text-sm leading-relaxed max-w-xs mx-auto">Bergabunglah dengan komunitas Sortiq dan ubah sampah rumah tangga menjadi poin berharga.</p>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center relative">
+                <div class="md:hidden mb-8 text-center">
+                    <h1 class="text-3xl font-black text-emerald-600 tracking-tighter">SORTIQ</h1>
+                </div>
+
+                <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-8 w-max mx-auto md:mx-0">
+                    <button @click="toggleMode('login')" :class="mode === 'login' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all">Masuk</button>
+                    <button @click="toggleMode('register')" :class="mode === 'register' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all">Daftar Baru</button>
+                </div>
+
+                <div class="mb-8 text-center md:text-left">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2" x-text="mode === 'login' ? 'Selamat Datang!' : 'Buat Akun Baru'"></h2>
+                    <p class="text-slate-400 text-sm" x-text="mode === 'login' ? 'Masuk untuk melanjutkan aktivitasmu.' : 'Daftar dan verifikasi email untuk mulai.'"></p>
+                </div>
+
+                <div x-show="successMessage" x-transition class="mb-4 p-3 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100 flex items-center gap-2" x-cloak>
+                    <i class="ph-bold ph-check-circle text-lg"></i> <span x-text="successMessage"></span>
+                </div>
+
+                <div x-show="errorMessage" x-transition class="mb-4 p-3 rounded-xl bg-red-50 text-red-500 text-xs font-bold border border-red-100 flex items-center gap-2" x-cloak>
+                    <i class="ph-bold ph-warning-circle text-lg"></i> <span x-text="errorMessage"></span>
+                </div>
+
+                <form @submit.prevent="handleSubmit" class="space-y-4">
+                    <div x-show="mode === 'register'" x-transition>
+                        <div class="relative">
+                            <i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                            <input type="text" x-model="name" placeholder="Nama Lengkap" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition font-medium">
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="email" x-model="email" placeholder="Email Address" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition font-medium">
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="password" x-model="password" placeholder="Password" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition font-medium">
+                    </div>
+                    <button type="submit" :disabled="isLoading" class="w-full bg-slate-900 hover:bg-emerald-600 disabled:bg-slate-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex justify-center items-center gap-2 mt-6">
+                        <span x-show="!isLoading" x-text="mode === 'login' ? 'Masuk Sekarang' : 'Daftar & Verifikasi'"></span>
+                        <i x-show="!isLoading" class="ph-bold ph-arrow-right"></i>
+                        <div x-show="isLoading" class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIKA FIREBASE & EMAILJS -->
     <script type="module">
-        import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, doc, setDoc } from './firebase-init.js';
+        import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, doc, setDoc, updateDoc } from './firebase-init.js';
 
-        // Fungsi Global untuk diakses AlpineJS
-        window.firebaseAuth = {
+        window.authFunctions = {
             login: async (email, password) => {
-                // 1. Validasi Keras Khusus Admin
-                if (email === 'gregoriusolvans16@gmail.com') {
-                    if (password !== 'Olvans123') {
-                        throw new Error("Password Admin Salah! Akses Ditolak.");
-                    }
-                }
-
-                // 2. Proses Sign In ke Firebase Auth
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                
-                // 3. Pengalihan Halaman Berdasarkan Peran
-                if (email === 'gregoriusolvans16@gmail.com') {
-                    localStorage.setItem('sortiq_role', 'admin');
-                    window.location.href = 'dashboard-admin.html';
-                } else {
-                    localStorage.setItem('sortiq_role', 'user');
-                    window.location.href = 'dashboard.html';
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    return { success: true, user: userCredential.user };
+                } catch (error) {
+                    return { success: false, error: error.message };
                 }
             },
-            register: async (name, email, password) => {
-                // 1. Buat Akun di Firebase Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // 2. Simpan Profil Tambahan di Firestore Database
-                await setDoc(doc(db, "users", user.uid), {
-                    name: name,
-                    email: email,
-                    xp: 0,
-                    role: 'user',
-                    createdAt: new Date().toISOString()
-                });
-
-                alert('Pendaftaran berhasil! Silakan masuk ke akun baru Anda.');
-                return true;
+            register: async (email, password, name) => {
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: name,
+                        email: email,
+                        xp: 0,
+                        role: 'user',
+                        isVerified: false, 
+                        createdAt: new Date()
+                    });
+                    return { success: true, uid: user.uid };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            },
+            verifyUser: async (uid) => {
+                try {
+                    await updateDoc(doc(db, "users", uid), { isVerified: true });
+                    return true;
+                } catch (e) {
+                    console.error("Gagal Verifikasi DB:", e);
+                    return false;
+                }
+            },
+            forceLogout: async () => {
+                await signOut(auth);
             }
         };
     </script>
 
-    <!-- === LOGIKA UI ALPINEJS === -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('authApp', () => ({
-                isLogin: true,
+                mode: 'login',
                 isLoading: false,
-                errorMsg: '',
-                form: { name: '', email: '', password: '' },
+                errorMessage: '',
+                successMessage: '',
+                
+                name: '', email: '', password: '',
+                
+                showOtpModal: false,
+                otpInput: '',
+                generatedOtp: '',
+                otpLoading: false,
+                tempUid: null, 
+                otpFallbackCode: '', 
 
-                async submitAuth() {
-                    this.isLoading = true;
-                    this.errorMsg = '';
-                    
+                // --- KONFIGURASI EMAILJS ASLI ---
+                emailJsConfig: {
+                    serviceID: "service_cqjjvjv",
+                    templateID: "template_44qfnqn",
+                    publicKey: "1Znc4cE7vGJPLq11T" 
+                },
+
+                init() {
+                    // Init EmailJS dengan Public Key Asli
                     try {
-                        if (this.isLogin) {
-                            // Jalankan Fungsi Login
-                            await window.firebaseAuth.login(this.form.email, this.form.password);
-                        } else {
-                            // Jalankan Fungsi Register
-                            if (!this.form.name) throw new Error("Nama lengkap wajib diisi.");
-                            const success = await window.firebaseAuth.register(this.form.name, this.form.email, this.form.password);
-                            if (success) {
-                                this.isLogin = true;
-                                this.form.password = '';
+                         emailjs.init(this.emailJsConfig.publicKey);
+                    } catch(e) { console.warn("EmailJS init failed", e); }
+                },
+
+                toggleMode(newMode) {
+                    this.mode = newMode;
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                },
+
+                async handleSubmit() {
+                    this.errorMessage = '';
+                    this.successMessage = '';
+                    
+                    if (!this.email || !this.password) {
+                        this.errorMessage = "Email dan Password wajib diisi.";
+                        return;
+                    }
+
+                    if (this.mode === 'register' && !this.name) {
+                        this.errorMessage = "Nama Lengkap wajib diisi.";
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    if (this.mode === 'login') {
+                        const result = await window.authFunctions.login(this.email, this.password);
+                        if (result.success) {
+                            if (result.user.email === 'gregoriusolvans16@gmail.com') {
+                                window.location.href = 'dashboard-admin.html';
+                            } else {
+                                window.location.href = 'dashboard.html';
                             }
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        // Terjemahan pesan error umum dari Firebase ke Bahasa Indonesia
-                        if (e.code === 'auth/invalid-credential') {
-                            this.errorMsg = "Email atau password salah.";
-                        } else if (e.code === 'auth/email-already-in-use') {
-                            this.errorMsg = "Email ini sudah digunakan oleh akun lain.";
-                        } else if (e.code === 'auth/weak-password') {
-                            this.errorMsg = "Password terlalu lemah (minimal 6 karakter).";
                         } else {
-                            this.errorMsg = e.message;
+                            this.handleError(result.error);
                         }
-                    } finally {
                         this.isLoading = false;
+
+                    } else {
+                        const result = await window.authFunctions.register(this.email, this.password, this.name);
+                        if (result.success) {
+                            this.tempUid = result.uid;
+                            this.showOtpModal = true;
+                            this.resendOtp(); // Send OTP Real
+                        } else {
+                            this.handleError(result.error);
+                        }
+                        this.isLoading = false;
+                    }
+                },
+
+                resendOtp() {
+                    this.otpLoading = true;
+                    this.otpFallbackCode = ''; // Reset fallback
+                    const code = Math.floor(100000 + Math.random() * 900000).toString();
+                    this.generatedOtp = code;
+
+                    const templateParams = {
+                        to_name: this.name,
+                        to_email: this.email,
+                        otp_code: code
+                    };
+
+                    emailjs.send(this.emailJsConfig.serviceID, this.emailJsConfig.templateID, templateParams)
+                        .then(() => {
+                            // Sukses kirim email
+                            // alert("Kode OTP telah dikirim ke email Anda.");
+                            this.otpLoading = false;
+                        }, (error) => {
+                            console.error("EmailJS Error:", error);
+                            // Jika GAGAL (misal kuota habis/error network), TAMPILKAN DI LAYAR AGAR USER TETAP BISA MASUK
+                            this.otpFallbackCode = code;
+                            this.otpLoading = false;
+                        });
+                },
+
+                async verifyOtp() {
+                    this.otpLoading = true;
+                    if (this.otpInput === this.generatedOtp) {
+                        const dbSuccess = await window.authFunctions.verifyUser(this.tempUid);
+                        if (dbSuccess) {
+                            await window.authFunctions.forceLogout();
+                            this.showOtpModal = false;
+                            this.mode = 'login';
+                            this.successMessage = "Verifikasi Berhasil! Silakan Login.";
+                            this.password = ''; 
+                            this.otpInput = '';
+                        } else {
+                            this.errorMessage = "Gagal verifikasi database.";
+                        }
+                    } else {
+                        alert("Kode OTP Salah! Cek kembali.");
+                    }
+                    this.otpLoading = false;
+                },
+
+                handleError(errorCode) {
+                    if (errorCode.includes('auth/invalid-credential') || errorCode.includes('auth/wrong-password')) {
+                        this.errorMessage = "Email atau password salah.";
+                    } else if (errorCode.includes('auth/user-not-found')) {
+                        this.errorMessage = "Akun tidak ditemukan. Silakan daftar.";
+                    } else if (errorCode.includes('auth/email-already-in-use')) {
+                        this.errorMessage = "Email sudah terdaftar. Silakan login.";
+                    } else if (errorCode.includes('auth/weak-password')) {
+                        this.errorMessage = "Password terlalu lemah (min. 6 karakter).";
+                    } else {
+                        this.errorMessage = "Terjadi kesalahan: " + errorCode;
                     }
                 }
             }));
