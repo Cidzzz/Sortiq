@@ -13,12 +13,12 @@
     <!-- Firebase Libraries & Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, setDoc, serverTimestamp, query } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         // --- 1. SETUP FIREBASE ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sortiq-app';
         
         let db, auth, userUid;
 
@@ -35,73 +35,98 @@
                     const initAuth = async () => {
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                             await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
                         }
                     };
-                    await initAuth();
+                    initAuth();
 
                     onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             userUid = user.uid;
-                            alpineScope.username = "User " + userUid.substring(0, 5);
-
+                            
+                            // 1. Listen Profile Data & SECURITY CHECK
                             const userDocRef = doc(db, 'artifacts', appId, 'users', userUid, 'profile', 'data');
                             onSnapshot(userDocRef, (docSnap) => {
                                 if (docSnap.exists()) {
                                     const data = docSnap.data();
+                                    
+                                    // SECURITY CHECK: Jika diblokir, logout paksa
+                                    if (data.isBlocked) {
+                                        alert("Akun Anda telah diblokir oleh Admin. Hubungi layanan pelanggan.");
+                                        signOut(auth).then(() => window.location.href = 'login.html');
+                                        return;
+                                    }
+
                                     alpineScope.xp = data.xp || 0;
-                                    alpineScope.username = data.name || alpineScope.username;
-                                    alpineScope.email = data.email || '';
-                                    alpineScope.phone = data.phone || '0812-3456-7890'; // Default phone
+                                    alpineScope.username = data.name || "User Sortiq";
+                                    alpineScope.email = data.email || user.email;
+                                    alpineScope.phone = data.phone || "";
                                 } else {
+                                    // Buat dokumen user baru jika belum ada (safety net)
                                     setDoc(userDocRef, {
                                         xp: 0,
                                         name: "Pengguna Baru",
-                                        email: "",
-                                        phone: "",
-                                        joinedAt: serverTimestamp()
+                                        email: user.email || "anon",
+                                        joinedAt: serverTimestamp(),
+                                        isBlocked: false
                                     });
                                 }
                             });
 
+                            // 2. Listen Deposit History (Riwayat Setoran)
                             const depositsRef = collection(db, 'artifacts', appId, 'public', 'data', 'deposits');
                             onSnapshot(depositsRef, (snapshot) => {
                                 const allDeposits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                                 const myDeposits = allDeposits
                                     .filter(d => d.uid === userUid)
-                                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date));
                                 alpineScope.userHistory = myDeposits;
                             });
 
+                            // 3. Listen Market Orders (Riwayat Belanja)
                             const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'market_orders');
                             onSnapshot(ordersRef, (snapshot) => {
                                 const allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                                 const myOrders = allOrders
                                     .filter(d => d.uid === userUid)
-                                    .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date));
                                 alpineScope.marketOrders = myOrders;
                             });
+
+                            // 4. LISTEN ECO MARKET ITEMS (DARI ADMIN)
+                            // Mengambil data real dari database, bukan dummy array
+                            const marketRef = collection(db, 'artifacts', appId, 'public', 'data', 'market_items');
+                            onSnapshot(marketRef, (snapshot) => {
+                                alpineScope.marketItems = snapshot.docs.map(doc => ({ 
+                                    id: doc.id, 
+                                    ...doc.data(),
+                                    // Fallback UI properties jika admin lupa isi detail
+                                    details: doc.data().details || { longDesc: doc.data().desc, benefits: ['Kualitas Terbaik'], quantity: '1 Unit', specs: 'Standar' }
+                                }));
+                            });
+
                         }
                     });
                 },
 
+                // SUBMIT DEPOSIT (Kirim Sampah)
                 submitDeposit: async (data) => {
                     if (!userUid || !db) return false;
                     try {
+                        const currentName = document.querySelector('[x-data]')._x_dataStack[0].username;
+                        const currentEmail = document.querySelector('[x-data]')._x_dataStack[0].email;
+
                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'deposits'), {
                             uid: userUid,
+                            userName: currentName || 'User',
+                            userEmail: currentEmail || 'No Email',
                             weight: parseFloat(data.weight),
                             xpReward: parseInt(data.xpReward),
                             address: data.address,
-                            status: 'Approved', 
+                            status: 'Pending', 
                             tpaName: data.tpaName,
                             timestamp: serverTimestamp(),
                             date: new Date().toISOString()
                         });
-                        
-                        // Auto add XP immediately for this demo flow
-                        const userDocRef = doc(db, 'artifacts', appId, 'users', userUid, 'profile', 'data');
                         return true;
                     } catch (e) {
                         console.error("Deposit failed:", e);
@@ -109,28 +134,33 @@
                     }
                 },
 
+                // SUBMIT ORDER (Belanja/Redeem)
                 submitOrder: async (orderData, currentXP) => {
                     if (!userUid || !db) return false;
-                    if (orderData.type === 'xp') {
-                         const newXP = currentXP - orderData.priceValue;
-                         if (newXP < 0) return false;
+                    
+                    // Logic Potong XP (Hanya jika tipe item adalah XP)
+                    if (orderData.itemType === 'xp' || orderData.type === 'xp') {
+                         const cost = orderData.priceValue || 0;
+                         const newXP = currentXP - cost;
+                         
+                         if (newXP < 0) return false; 
+                         
                          try {
                             const userDocRef = doc(db, 'artifacts', appId, 'users', userUid, 'profile', 'data');
                             await updateDoc(userDocRef, { xp: newXP });
-                         } catch(e) { 
-                             console.error("Failed deduct XP", e);
-                             return false; 
-                         }
+                         } catch(e) { console.error("Failed deduct XP", e); return false; }
                     }
+
+                    // Simpan Transaksi
                     try {
                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'market_orders'), {
                             uid: userUid,
-                            itemName: orderData.name,
-                            itemType: orderData.type,
-                            costDisplay: orderData.cost,
+                            itemName: orderData.name || orderData.itemName,
+                            itemType: orderData.type || orderData.itemType,
+                            costDisplay: orderData.cost || orderData.costDisplay,
                             priceValue: orderData.priceValue,
-                            status: orderData.status || 'Diproses',
-                            shippingMethod: orderData.method,
+                            status: orderData.status || 'Berhasil',
+                            shippingMethod: orderData.method || orderData.shippingMethod,
                             meta: orderData.meta || {},
                             timestamp: serverTimestamp(),
                             date: new Date().toISOString()
@@ -140,65 +170,6 @@
                         console.error("Order failed:", e);
                         return false;
                     }
-                }
-            };
-        } else {
-            // --- MOCK BRIDGE (DEMO MODE) ---
-            let _scope = null;
-            window.fbBridge = {
-                init: (alpineScope) => {
-                    _scope = alpineScope;
-                    setTimeout(() => {
-                        alpineScope.username = "Demo User";
-                        alpineScope.email = "user@sortiq.demo";
-                        alpineScope.phone = "081234567890";
-                        alpineScope.xp = 15000;
-                        alpineScope.userHistory = [
-                            { id: 1, weight: 2.5, status: 'Approved', xpReward: 125, date: new Date().toISOString() }
-                        ];
-                    }, 500);
-                },
-                submitDeposit: async (data) => {
-                    await new Promise(r => setTimeout(r, 500)); 
-                    if (_scope) {
-                        _scope.userHistory.unshift({
-                            id: Date.now(),
-                            uid: 'demo-user',
-                            weight: parseFloat(data.weight),
-                            xpReward: parseInt(data.xpReward),
-                            address: data.address,
-                            status: 'Approved',
-                            tpaName: data.tpaName,
-                            timestamp: { seconds: Date.now() / 1000 },
-                            date: new Date().toISOString()
-                        });
-                         _scope.xp = (_scope.xp || 0) + parseInt(data.xpReward);
-                    }
-                    return true;
-                },
-                submitOrder: async (data, currentXP) => {
-                    await new Promise(r => setTimeout(r, 1500));
-                    if (_scope) {
-                        const newOrder = {
-                            id: Date.now(),
-                            uid: 'demo-user',
-                            itemName: data.name,
-                            itemType: data.type,
-                            costDisplay: data.cost,
-                            priceValue: data.priceValue,
-                            status: data.status || 'Berhasil',
-                            shippingMethod: data.method,
-                            meta: data.meta || {},
-                            timestamp: { seconds: Date.now() / 1000 },
-                            date: new Date().toISOString()
-                        };
-                        _scope.marketOrders.unshift(newOrder); 
-                        
-                        if (data.type === 'xp') {
-                            _scope.xp = (_scope.xp || 0) - data.priceValue;
-                        }
-                    }
-                    return true;
                 }
             };
         }
@@ -241,7 +212,7 @@
         <aside class="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 h-full z-30 shadow-sm">
             <div class="p-8 flex items-center gap-3">
                 <div class="w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center overflow-hidden">
-                    <img src="https://ui-avatars.com/api/?name=S&background=10b981&color=fff" alt="Logo" class="w-full h-full object-cover">
+                    <img src="logo.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="font-bold text-xl tracking-tight text-slate-900 leading-none">SORTIQ</h1>
@@ -270,7 +241,7 @@
             </nav>
 
             <div class="p-4 border-t border-slate-100">
-                <button onclick="if(confirm('Apakah Anda yakin ingin keluar?')) location.reload()" class="w-full flex items-center gap-3 text-red-500 font-bold text-sm hover:bg-red-50 p-4 rounded-2xl transition group">
+                <button onclick="if(confirm('Apakah Anda yakin ingin keluar?')) window.location.href='login.html'" class="w-full flex items-center gap-3 text-red-500 font-bold text-sm hover:bg-red-50 p-4 rounded-2xl transition group">
                     <i class="ph-bold ph-sign-out text-xl group-hover:-translate-x-1 transition"></i> Keluar Akun
                 </button>
             </div>
@@ -322,7 +293,7 @@
                                     <i class="ph-bold ph-receipt"></i> Pesanan Saya
                                 </button>
                                 <div class="h-px bg-slate-100 my-1"></div>
-                                <button onclick="if(confirm('Keluar akun?')) location.reload()" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 flex items-center gap-2 transition">
+                                <button onclick="window.location.href='login.html'" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 flex items-center gap-2 transition">
                                     <i class="ph-bold ph-sign-out"></i> Keluar Akun
                                 </button>
                             </div>
@@ -628,7 +599,7 @@
                             <!-- Search Bar -->
                             <div class="relative group">
                                 <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></i>
-                                <input type="text" x-model="tpaSearch" placeholder="Cari SORTIQ point..." class="w-full pl-11 pr-4 py-3 bg-slate-50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 border border-transparent focus:border-emerald-500 transition-all font-medium text-slate-700 placeholder:text-slate-400">
+                                <input type="text" x-model="tpaSearch" placeholder="Cari SORTIQ point..." class="w-full pl-11 pr-4 py-3 bg-slate-50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent focus:border-emerald-500 transition-all font-medium text-slate-700 placeholder:text-slate-400">
                             </div>
                         </div>
 
@@ -642,7 +613,7 @@
                                     <button @click="selectTpa(tpa.id)" 
                                             :class="selectedTpaId === tpa.id ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500 shadow-sm' : 'bg-white border-transparent hover:bg-slate-50'"
                                             class="w-full text-left p-3 rounded-2xl border transition-all duration-200 group relative overflow-hidden">
-                                        
+                                     
                                         <div class="flex justify-between items-start relative z-10">
                                             <div>
                                                 <h4 :class="selectedTpaId === tpa.id ? 'text-emerald-900' : 'text-slate-800'" class="font-bold text-sm line-clamp-1" x-text="tpa.nama"></h4>
@@ -842,7 +813,7 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Saldo Kamu</p>
                             <p class="text-xl font-black text-emerald-600" x-text="xp + ' XP'"></p>
                         </div>
-                         <!-- VOUCHER SORTING DROPDOWN (Visible only in redeem tab and when Vouchers are shown) -->
+                          <!-- VOUCHER SORTING DROPDOWN (Visible only in redeem tab and when Vouchers are shown) -->
                         <div x-show="marketTab === 'redeem'" class="relative" x-data="{ sortOpen: false }">
                              <button @click="sortOpen = !sortOpen" class="flex items-center gap-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:border-emerald-500 transition">
                                 <i class="ph-bold ph-sort-ascending"></i> Sortir
@@ -897,7 +868,12 @@
                             <template x-for="item in sortedVouchers" :key="item.id">
                                 <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col h-full hover:shadow-2xl hover:-translate-y-1 transition duration-300">
                                     <div :class="item.bgClass" class="h-40 rounded-[1.5rem] mb-4 flex items-center justify-center text-5xl shadow-inner relative overflow-hidden">
-                                        <i :class="item.icon"></i>
+                                        <template x-if="item.image">
+                                            <img :src="item.image" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!item.image">
+                                            <i :class="item.icon"></i>
+                                        </template>
                                     </div>
                                     <div class="flex-1 px-2">
                                         <h4 class="font-bold text-lg text-slate-800 leading-tight" x-text="item.name"></h4>
@@ -919,7 +895,12 @@
                         <template x-for="item in marketItems" :key="item.id">
                             <div x-show="item.category === 'shop'" class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col h-full hover:shadow-2xl hover:-translate-y-1 transition duration-300">
                                 <div :class="item.bgClass" class="h-40 rounded-[1.5rem] mb-4 flex items-center justify-center text-5xl shadow-inner relative overflow-hidden">
-                                    <i :class="item.icon"></i>
+                                    <template x-if="item.image">
+                                        <img :src="item.image" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!item.image">
+                                        <i :class="item.icon"></i>
+                                    </template>
                                     <div x-show="item.type === 'money'" class="absolute top-3 right-3 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-slate-600 border border-white/20">Beli</div>
                                 </div>
                                 <div class="flex-1 px-2">
@@ -942,7 +923,7 @@
                     </div>
                 </div>
 
-                <!-- 7. ORDERS, 8. HISTORY, 9. ACCOUNT, 10. TRACKING views kept same ... -->
+                <!-- 7. ORDERS -->
                  <div x-show="currentPage === 'orders'" x-transition.opacity.duration.300ms class="max-w-3xl mx-auto">
                     <!-- ... Orders Content ... -->
                     <div class="text-center mb-8">
@@ -1008,7 +989,7 @@
 
                 <div x-show="currentPage === 'history'" x-transition.opacity.duration.300ms class="max-w-2xl mx-auto min-h-screen">
                     <!-- ... History Content ... -->
-                     <div class="flex items-center gap-4 mb-6">
+                      <div class="flex items-center gap-4 mb-6">
                         <button @click="setPage('home')" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition shadow-sm text-slate-600">
                             <i class="ph-bold ph-arrow-left text-lg"></i>
                         </button>
@@ -1057,7 +1038,7 @@
 
                 <div x-show="currentPage === 'account'" x-transition.opacity.duration.300ms class="max-w-4xl mx-auto space-y-6">
                     <!-- ... Account Content ... -->
-                     <div class="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-6">
+                      <div class="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-6">
                         <div class="relative group">
                             <img :src="`https://ui-avatars.com/api/?name=${username}&background=10b981&color=fff&size=128`" class="w-24 h-24 rounded-full border-4 border-emerald-100 shadow-sm">
                             <button class="absolute bottom-0 right-0 bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition">
@@ -1101,16 +1082,10 @@
                             <div class="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm">
                                 <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ph-bold ph-shield-check"></i> Keamanan</h3>
                                 <div class="space-y-3">
-                                    <button class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition group">
+                                    <button @click="showChangePasswordModal = true" class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition group">
                                         <span class="text-sm font-medium text-slate-600">Ubah Kata Sandi</span>
                                         <i class="ph-bold ph-caret-right text-slate-400 group-hover:text-slate-600"></i>
                                     </button>
-                                    <div class="flex items-center justify-between p-3">
-                                        <span class="text-sm font-medium text-slate-600">Autentikasi 2 Faktor</span>
-                                        <div class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200">
-                                            <span class="translate-x-1 inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1129,16 +1104,22 @@
                                     <template x-for="(card, index) in paymentMethods" :key="index">
                                         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 group">
                                             <div class="flex items-center gap-4">
-                                                <div class="w-12 h-8 bg-blue-600 rounded-md shadow-sm relative overflow-hidden flex items-center justify-center text-white text-[10px] font-bold tracking-widest">
-                                                    <div class="absolute top-0 right-0 w-6 h-6 bg-white/20 rounded-full -mr-2 -mt-2"></div>
-                                                    <span x-text="card.type">VISA</span>
+                                                <div class="w-14 h-9 bg-white rounded-md shadow-sm border border-slate-200 flex items-center justify-center p-1 overflow-hidden relative">
+                                                    <!-- Show Logo if available -->
+                                                    <template x-if="banks.find(b => b.name === card.type)?.logo">
+                                                        <img :src="banks.find(b => b.name === card.type)?.logo" class="w-full h-full object-contain" :alt="card.type">
+                                                    </template>
+                                                    <!-- Fallback text if logo missing -->
+                                                    <template x-if="!banks.find(b => b.name === card.type)?.logo">
+                                                        <span class="text-[10px] font-bold text-slate-600" x-text="card.type"></span>
+                                                    </template>
                                                 </div>
                                                 <div>
                                                     <p class="text-sm font-bold text-slate-800" x-text="card.name"></p>
-                                                    <p class="text-xs text-slate-500 font-mono" x-text="'•••• •••• •••• ' + card.last4"></p>
+                                                    <p class="text-xs text-slate-500 font-mono" x-text="'•••• ' + card.last4 + ' • ' + card.type"></p>
                                                 </div>
                                             </div>
-                                            <button class="text-slate-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"><i class="ph-bold ph-trash"></i></button>
+                                            <button @click="removePaymentMethod(index)" class="text-slate-400 hover:text-red-500 p-2 transition"><i class="ph-bold ph-trash"></i></button>
                                         </div>
                                     </template>
                                 </div>
@@ -1172,11 +1153,20 @@
                     </div>
                 </div>
 
-                <!-- 10. NEW: TRACKING PAGE -->
+                <!-- 10. NEW: TRACKING PAGE (UPDATED) -->
                 <div x-show="currentPage === 'tracking'" x-transition.opacity.duration.300ms class="max-w-4xl mx-auto h-[calc(100vh-100px)] flex flex-col md:flex-row gap-6 overflow-hidden">
                     <div class="flex-1 bg-slate-200 rounded-[2rem] overflow-hidden relative shadow-inner isolate group">
-                        <iframe src="https://maps.google.com/maps?q=-7.289166,112.756549&t=m&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" class="filter contrast-[1.05] grayscale-[0.1]"></iframe>
-                        <button @click="setPage('orders')" class="absolute top-4 left-4 bg-white/90 backdrop-blur-md w-10 h-10 rounded-full shadow-sm flex items-center justify-center hover:bg-white transition text-slate-600"><i class="ph-bold ph-arrow-left"></i></button>
+                        <!-- Simulated Map with Marker -->
+                        <div class="relative w-full h-full">
+                             <iframe src="https://maps.google.com/maps?q=-7.289166,112.756549&t=m&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" frameborder="0" class="filter contrast-[1.05] grayscale-[0.1]"></iframe>
+                             <!-- Moving Marker Simulation -->
+                             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-1000" :style="`transform: translate(${courierPos.x}px, ${courierPos.y}px)`">
+                                  <div class="w-12 h-12 bg-blue-600 rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white animate-bounce">
+                                      <i class="ph-fill ph-moped text-xl"></i>
+                                  </div>
+                             </div>
+                        </div>
+                        <button @click="setPage('orders')" class="absolute top-4 left-4 bg-white/90 backdrop-blur-md w-10 h-10 rounded-full shadow-sm flex items-center justify-center hover:bg-white transition text-slate-600 z-20"><i class="ph-bold ph-arrow-left"></i></button>
                     </div>
                     <div class="w-full md:w-96 bg-white rounded-[2rem] p-6 border border-slate-200 shadow-sm flex flex-col gap-6 overflow-y-auto">
                         <div class="text-center">
@@ -1199,25 +1189,21 @@
                             </div>
                         </div>
 
-                        <div class="space-y-4 flex-1">
-                            <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wider border-b border-slate-100 pb-2">Status Pesanan</h4>
-                            <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm z-10 animate-pulse"></div>
-                                    <p class="text-sm font-bold text-slate-800">Kurir Menuju Lokasi</p>
-                                    <p class="text-[10px] text-slate-400">12:45 PM • Posisi saat ini di Jl. Dharmawangsa</p>
-                                </div>
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-slate-300 border-2 border-white z-10"></div>
-                                    <p class="text-sm font-bold text-slate-400">Pesanan Diproses</p>
-                                    <p class="text-[10px] text-slate-400">12:30 PM • Pesanan dikemas oleh penjual</p>
-                                </div>
-                                <div class="relative">
-                                    <div class="absolute -left-6 top-1 w-4 h-4 rounded-full bg-slate-300 border-2 border-white z-10"></div>
-                                    <p class="text-sm font-bold text-slate-400">Pesanan Diterima</p>
-                                    <p class="text-[10px] text-slate-400">12:28 PM • Pembayaran berhasil diverifikasi</p>
-                                </div>
-                            </div>
+                        <!-- Dynamic Tracking Status -->
+                        <div class="space-y-0 flex-1 relative pl-8 before:content-[''] before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                             <template x-for="(step, idx) in trackingSteps" :key="idx">
+                                 <div class="relative pb-8 last:pb-0">
+                                     <div class="absolute -left-8 top-0 w-7 h-7 rounded-full border-4 border-white shadow-sm z-10 flex items-center justify-center"
+                                          :class="step.active ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'">
+                                          <i class="ph-bold ph-check text-[10px]" x-show="step.completed"></i>
+                                          <div class="w-2 h-2 bg-white rounded-full" x-show="step.active && !step.completed"></div>
+                                     </div>
+                                     <div>
+                                         <p class="text-sm font-bold" :class="step.active ? 'text-slate-800' : 'text-slate-400'" x-text="step.title"></p>
+                                         <p class="text-[10px] text-slate-400" x-text="step.desc"></p>
+                                     </div>
+                                 </div>
+                             </template>
                         </div>
 
                         <div class="pt-4 border-t border-slate-100">
@@ -1386,28 +1372,77 @@
             <h3 class="font-bold text-slate-800 text-lg mb-4">Tambah Kartu Baru</h3>
             <form @submit.prevent="addPaymentMethod" class="space-y-4">
                 <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Pilih Bank</label>
+                    <div class="relative">
+                        <select x-model="newPayment.bank" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 appearance-none">
+                            <template x-for="bank in banks" :key="bank.id">
+                                <option :value="bank.id" x-text="bank.name + ' - ' + bank.code"></option>
+                            </template>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <div class="mt-2 flex items-center gap-2" x-show="newPayment.bank">
+                        <!-- PREVIEW LOGO DI MODAL: Menggunakan logo asli bukan kotak warna -->
+                        <div class="w-14 h-9 bg-white rounded-md shadow-sm border border-slate-200 flex items-center justify-center p-1 overflow-hidden relative">
+                            <template x-if="banks.find(b => b.id === newPayment.bank)?.logo">
+                                <img :src="banks.find(b => b.id === newPayment.bank)?.logo" class="w-full h-full object-contain">
+                            </template>
+                            <template x-if="!banks.find(b => b.id === newPayment.bank)?.logo">
+                                <span class="text-[10px] font-bold text-slate-600" x-text="banks.find(b => b.id === newPayment.bank)?.name"></span>
+                            </template>
+                        </div>
+                        <span class="text-xs font-bold text-slate-600" x-text="banks.find(b => b.id === newPayment.bank)?.name"></span>
+                    </div>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nama Pemilik Kartu</label>
                     <input type="text" x-model="newPayment.holder" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nomor Kartu</label>
+                    <!-- CHANGED: Label text & Icon & Placeholder -->
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nomor Rekening</label>
                     <div class="relative">
-                        <input type="text" x-model="newPayment.number" placeholder="0000 0000 0000 0000" maxlength="19" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 pl-10" required>
-                        <i class="ph-bold ph-credit-card absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" x-model="newPayment.number" placeholder="1234567890" maxlength="19" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 pl-10" required>
+                        <i class="ph-bold ph-bank absolute left-3 top-3 text-slate-400"></i>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Masa Berlaku</label>
-                        <input type="text" x-model="newPayment.expiry" placeholder="MM/YY" maxlength="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
+                        <input type="text" x-model="newPayment.expiry" @input="formatExpiry" placeholder="MM/YY" maxlength="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">CVV</label>
-                        <input type="password" maxlength="3" placeholder="123" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
+                        <input type="password" x-model="newPayment.cvv" @input="formatCVV" maxlength="3" placeholder="123" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
                     </div>
                 </div>
                 <div class="pt-2 flex gap-3">
                     <button type="button" @click="showAddPaymentModal = false" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-600 transition shadow-lg">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Change Password Modal -->
+    <div x-show="showChangePasswordModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" style="display: none;">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showChangePasswordModal = false"></div>
+        <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 p-6">
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Ubah Kata Sandi</h3>
+            <form @submit.prevent="changePassword" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Kata Sandi Lama</label>
+                    <input type="password" x-model="passwordData.old" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Kata Sandi Baru</label>
+                    <input type="password" x-model="passwordData.new" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Konfirmasi Kata Sandi</label>
+                    <input type="password" x-model="passwordData.confirm" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" @click="showChangePasswordModal = false" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition">Batal</button>
                     <button type="submit" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-600 transition shadow-lg">Simpan</button>
                 </div>
             </form>
@@ -1535,6 +1570,8 @@
                 showProductModal: false,
                 showCartModal: false, 
                 showAddPaymentModal: false, 
+                showChangePasswordModal: false,
+                passwordData: { old: '', new: '', confirm: '' },
                 showRedeemModal: false, // NEW
                 redeemType: null, // NEW
                 redeemStep: 1, // NEW
@@ -1554,8 +1591,19 @@
                 trashBag: { weight: 5.5, potentialXP: 550 }, 
                 shippingData: { address: '', method: 'pickup', note: '', payment: 'cash' },
                 depositData: { address: '' },
-                newPayment: { holder: '', number: '', expiry: '', type: 'GPN' }, 
-                paymentMethods: [{ name: 'Bank Indonesia Debit', number: '1234567812345678', last4: '5678', expiry: '12/28', type: 'GPN' }],
+                newPayment: { holder: '', number: '', expiry: '', cvv: '', bank: 'bca', type: 'Debit' },
+                // UPDATED BANK DATA WITH LOGOS
+                banks: [
+                    { id: 'bca', name: 'BCA', color: 'bg-blue-600', code: '014', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg' },
+                    { id: 'mandiri', name: 'Mandiri', color: 'bg-yellow-500', code: '008', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg' },
+                    { id: 'bri', name: 'BRI', color: 'bg-blue-800', code: '002', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/68/BANK_BRI_logo.svg' },
+                    { id: 'bni', name: 'BNI', color: 'bg-teal-600', code: '009', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Bank_Negara_Indonesia_logo.svg' },
+                    { id: 'cimb', name: 'CIMB Niaga', color: 'bg-red-600', code: '022', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/CIMB_Niaga_logo.svg' },
+                    { id: 'btn', name: 'BTN', color: 'bg-blue-500', code: '200', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Bank_BTN_logo.svg' },
+                    { id: 'danamon', name: 'Danamon', color: 'bg-orange-500', code: '011', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Bank_Danamon.svg' },
+                    { id: 'permata', name: 'Permata', color: 'bg-green-600', code: '013', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/PermataBank_logo.svg' }
+                ],
+                paymentMethods: [{ name: 'Bank Indonesia Debit', number: '1234567812345678', last4: '5678', expiry: '12/28', type: 'BCA' }],
                 userHistory: [], 
                 marketOrders: [],
                 cart: [], 
@@ -1565,6 +1613,16 @@
                 // NEW: Redeem Data State
                 redeemData: { phoneNumber: '', provider: '', nominal: 0, cost: 0, customerId: '', bank: '', accountNumber: '' },
                 inquiryResult: null,
+                marketItems: [], // NOW EMPTY, FILLED BY FIREBASE
+
+                // Tracking Data
+                trackingSteps: [
+                    { title: "Pesanan Diterima", desc: "12:28 PM • Pembayaran berhasil diverifikasi", active: true, completed: true },
+                    { title: "Pesanan Diproses", desc: "12:30 PM • Pesanan dikemas oleh penjual", active: true, completed: true },
+                    { title: "Kurir Menuju Lokasi", desc: "12:45 PM • Posisi saat ini di Jl. Dharmawangsa", active: true, completed: false },
+                    { title: "Pesanan Sampai", desc: "Estimasi 1:00 PM", active: false, completed: false }
+                ],
+                courierPos: { x: 0, y: 0 },
 
                 // Computed Properties
                 get cartTotal() { return this.cart.reduce((sum, item) => sum + item.priceValue, 0); },
@@ -1609,25 +1667,6 @@
                     return this.tpaData.length > 0 ? this.tpaData[0] : { nama: 'Memuat...', alamat: '...', jarak: '-', lat: 0, lng: 0 };
                 },
 
-                // Market Items - Cleaned up to separate services from vouchers
-                marketItems: [
-                    // Shop Items (Money)
-                    { id: 3, name: 'Starter Kit Kompos', desc: 'Perlengkapan praktis olah sampah organik.', cost: 'Rp 75.000', type: 'money', category: 'shop', priceValue: 75000, bgClass: 'bg-orange-50 text-orange-500', icon: 'ph-duotone ph-potted-plant', 
-                      details: { longDesc: 'Perlengkapan praktis untuk mengolah sampah organik...', benefits: ['Mengurangi sampah', 'Nutrisi tanah'], quantity: '1 Set Kompos', specs: 'Plastik daur ulang' } },
-                    { id: 4, name: 'Tempat Sampah Pilah', desc: 'Dua sekat untuk memilah sampah.', cost: 'Rp 65.000', type: 'money', category: 'shop', priceValue: 65000, bgClass: 'bg-slate-50 text-slate-500', icon: 'ph-duotone ph-trash',
-                      details: { longDesc: 'Tempat sampah dua sekat...', benefits: ['Memilah sampah', 'Ramah lingkungan'], quantity: '1 Unit', specs: '2x7 Liter' } },
-                    { id: 5, name: 'Sabun Cuci Eco', desc: 'Formula biodegradable aman lingkungan.', cost: 'Rp 15.000', type: 'money', category: 'shop', priceValue: 15000, bgClass: 'bg-cyan-50 text-cyan-500', icon: 'ph-duotone ph-drop',
-                      details: { longDesc: 'Sabun cuci ramah lingkungan...', benefits: ['Biodegradable', 'Lembut'], quantity: '200ml', specs: 'Cair' } },
-                    { id: 6, name: 'Sikat Serat Alami', desc: 'Pengganti spons plastik.', cost: 'Rp 12.000', type: 'money', category: 'shop', priceValue: 12000, bgClass: 'bg-amber-50 text-amber-600', icon: 'ph-duotone ph-broom',
-                      details: { longDesc: 'Sikat sabut kelapa...', benefits: ['Zero waste', 'Tahan lama'], quantity: '1 Pcs', specs: 'Sabut Kelapa' } },
-                    
-                    // Voucher Items (XP) - Explicit Vouchers
-                    { id: 101, name: 'Voucher Tokopedia 10rb', desc: 'Belanja hemat di Tokopedia.', cost: '1000 XP', type: 'xp', category: 'redeem', priceValue: 1000, bgClass: 'bg-green-50 text-green-600', icon: 'ph-duotone ph-bag' },
-                    { id: 102, name: 'Voucher Shopee 25rb', desc: 'Diskon ongkir & cashback.', cost: '2500 XP', type: 'xp', category: 'redeem', priceValue: 2500, bgClass: 'bg-orange-50 text-orange-600', icon: 'ph-duotone ph-shopping-bag' },
-                    { id: 103, name: 'Voucher Indomaret 50rb', desc: 'Belanja kebutuhan harian.', cost: '5000 XP', type: 'xp', category: 'redeem', priceValue: 5000, bgClass: 'bg-blue-50 text-blue-600', icon: 'ph-duotone ph-storefront' },
-                    { id: 104, name: 'Voucher Kopi Kenangan', desc: 'Satu cup kopi gratis.', cost: '1500 XP', type: 'xp', category: 'redeem', priceValue: 1500, bgClass: 'bg-red-50 text-red-600', icon: 'ph-duotone ph-coffee' }
-                ],
-
                 // ... Other vars (chat, etc) ...
                 chatMessages: [], chatInput: '',
 
@@ -1640,6 +1679,12 @@
                     if (storedBag) this.trashBag = JSON.parse(storedBag);
                     
                     this.chatMessages = [{ id: 1, text: `Halo! Saya AI SORTIQ. Ada yang bisa saya bantu?`, sender: 'bot', time: '10:00' }];
+
+                    // Tracking Simulation
+                    setInterval(() => {
+                        this.courierPos.x = (Math.random() - 0.5) * 20;
+                        this.courierPos.y = (Math.random() - 0.5) * 20;
+                    }, 2000);
                 },
 
                 // ... Helper Functions (setPage, etc) ...
@@ -1648,51 +1693,50 @@
                     const titles = { 'home': 'Dashboard', 'bag': 'Detail Kantong', 'tpa': 'Lokasi Setor', 'bot': 'Asisten AI', 'market': 'Eco Market', 'prices': 'Bursa Sampah', 'orders': 'Riwayat Belanja', 'history': 'Riwayat Setoran', 'account': 'Akun Saya', 'tracking': 'Pantau Kurir' };
                     this.pageTitle = titles[pageId] || 'Dashboard';
                     document.getElementById('main-scroll').scrollTop = 0;
-                    if (pageId === 'bag') setTimeout(() => this.renderChart(), 100); 
+                    // if (pageId === 'bag') setTimeout(() => this.renderChart(), 100); 
                 },
 
                 // ... Existing Logic (addPaymentMethod, renderChart, etc.) ...
                 addPaymentMethod() { 
+                    const bank = this.banks.find(b => b.id === this.newPayment.bank);
                     const last4 = this.newPayment.number.slice(-4);
                     this.paymentMethods.push({
                         name: this.newPayment.holder,
                         number: this.newPayment.number,
                         last4: last4,
                         expiry: this.newPayment.expiry,
-                        type: 'VISA' // Assuming VISA for added cards for simplicity, or based on number
+                        type: bank ? bank.name : 'Bank'
                     });
                     this.showAddPaymentModal = false;
-                    this.newPayment = { holder: '', number: '', expiry: '', type: 'GPN' };
+                    this.newPayment = { holder: '', number: '', expiry: '', cvv: '', bank: 'bca', type: 'Debit' };
                     alert("Metode pembayaran berhasil ditambahkan.");
                 },
-                renderChart() {
-                    const ctx = document.getElementById('marketChartDetail');
-                    if (!ctx) return;
-                    
-                    if (this.chartInstance) this.chartInstance.destroy();
-
-                    this.chartInstance = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                            datasets: [{
-                                label: 'Harga',
-                                data: [3100, 3150, 3100, 3300, 3400, 3450, 3500],
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                fill: true,
-                                tension: 0.4,
-                                pointRadius: 0,
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: { x: { display: false }, y: { display: false } }
-                        }
-                    });
+                formatExpiry(e) {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length > 2) {
+                        val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                    }
+                    this.newPayment.expiry = val;
+                    e.target.value = val;
+                },
+                formatCVV(e) {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length > 3) val = val.substring(0, 3);
+                    this.newPayment.cvv = val;
+                    e.target.value = val;
+                },
+                removePaymentMethod(index) {
+                    // UPDATED CONFIRMATION TEXT
+                    if(confirm("Apakah ingin menghapus rekening ini?")) {
+                        this.paymentMethods.splice(index, 1);
+                    }
+                },
+                changePassword() {
+                    if (this.passwordData.new !== this.passwordData.confirm) return alert("Konfirmasi kata sandi tidak cocok.");
+                    if (this.passwordData.new.length < 6) return alert("Kata sandi minimal 6 karakter.");
+                    alert("Kata sandi berhasil diubah!");
+                    this.showChangePasswordModal = false;
+                    this.passwordData = { old: '', new: '', confirm: '' };
                 },
                 formatDate(isoString) {
                     if(!isoString) return '-';
@@ -1735,9 +1779,12 @@
                 openProductModal(item) { this.selectedItem = item; this.showProductModal = true; },
                 addToCart(item) { this.cart.push(item); },
                 removeFromCart(index) { this.cart.splice(index, 1); },
+                
+                // FIXED: CHECKOUT CART LOOP
                 checkoutCart() {
                     this.showCartModal = false;
                     const totalCost = this.cartTotal;
+                    // Set dummy item for display purpose in payment modal
                     this.selectedItem = {
                         name: 'Pesanan Keranjang',
                         desc: this.cart.length + ' Item dari Eco Market',
@@ -1797,6 +1844,8 @@
                     if (this.paymentInterval) clearInterval(this.paymentInterval);
                     await this.finalizeOrder();
                 },
+                
+                // FIXED: FINALIZE ORDER LOOP FOR CART
                 async finalizeOrder() {
                     const isCartCheckout = this.selectedItem.name === 'Pesanan Keranjang';
                     
@@ -1806,11 +1855,28 @@
                     if (this.shippingData.method === 'pickup') status = 'Siap Diambil';
                     if (this.selectedItem.type === 'xp') status = 'Selesai'; 
 
-                    const success = await window.fbBridge.submitOrder({
-                        ...this.selectedItem,
-                        method: this.shippingData.method,
-                        status: status
-                    }, this.xp);
+                    let success = false;
+
+                    if (isCartCheckout) {
+                        // Loop through cart items and submit each
+                        let allSuccess = true;
+                        for (const item of this.cart) {
+                             const itemSuccess = await window.fbBridge.submitOrder({
+                                ...item,
+                                method: this.shippingData.method,
+                                status: status
+                            }, this.xp); // XP check handled inside per item if type is xp
+                            if(!itemSuccess) allSuccess = false;
+                        }
+                        success = allSuccess;
+                    } else {
+                        // Single Item
+                        success = await window.fbBridge.submitOrder({
+                            ...this.selectedItem,
+                            method: this.shippingData.method,
+                            status: status
+                        }, this.xp);
+                    }
 
                     if (success) {
                         this.paymentStep = 3;
@@ -1877,8 +1943,8 @@
                 },
                 
                 openVoucherModal(item) {
-                     // Reuse logic to simply redeem voucher directly like before or show details
-                     this.startTransaction(item); 
+                      // Reuse logic to simply redeem voucher directly like before or show details
+                      this.startTransaction(item); 
                 },
 
                 processInquiry() {
