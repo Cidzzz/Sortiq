@@ -5,12 +5,12 @@ import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateD
 
 // Konfigurasi Firebase yang diambil dari Firebase Console
 const firebaseConfig = {
-  apiKey: "AIzaSyCg3eqP5cg_ENDopZn00NK9aoogAdoFROM", // Ganti dengan API Key yang ada di gambar
-  authDomain: "sortiq-a9449.firebaseapp.com",
-  projectId: "sortiq-a9449",
-  storageBucket: "sortiq-a9449.firebasestorage.app",
-  messagingSenderId: "758082387378",
-  appId: "1:758082387378:web:93f1fdea4b5cdf5319f8ab"
+  apiKey: "AIzaSyBQG1n-hPzKGoQH1uboJ7Ee9ec-fH_pFJo",
+  authDomain: "sortiq-platform.firebaseapp.com",
+  projectId: "sortiq-platform",
+  storageBucket: "sortiq-platform.firebasestorage.app",
+  messagingSenderId: "730072323724",
+  appId: "1:730072323724:web:748ff32269337b8d998da9"
 };
 
 // Inisialisasi Firebase
