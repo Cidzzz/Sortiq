@@ -1,41 +1,54 @@
-// File: ai.js
-// Arahkan ke file proxy di hostingmu sendiri
-const API_URL = "proxy.php"; 
-const MODEL_NAME = "sortiq:latest"; // Pastikan nama model benar
+// File: public/ai.js
+const NGROK_URL = "https://everly-unmagnetised-serologically.ngrok-free.dev"; 
 
-async function getAIResponse(message) {
+const MODEL_NAME = "llama3"; 
+
+// ==================================================================================
+// LOGIKA UTAMA
+// ==================================================================================
+const CLEAN_URL = NGROK_URL.replace(/\/$/, "");
+const FULL_API_URL = `${CLEAN_URL}/api/generate`;
+
+console.log("=== SISTEM AI SORTIQ (MANUAL VISIT MODE) ===");
+console.log("Target API:", FULL_API_URL);
+
+window.askAI = async function(message) {
     try {
-        console.log("Mengirim pesan ke Proxy...");
+        console.log(`🚀 Mengirim pesan ke AI...`);
+        
+        const fullPrompt = `Kamu adalah SORTIQ Assistant, asisten bijak yang membantu pengguna mengelola sampah. Jawablah dengan ramah dalam Bahasa Indonesia.\n\nUser: ${message}\nAssistant:`;
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(FULL_API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+                // Header Ngrok DIHAPUS supaya tidak bentrok dengan Ollama
+            },
             body: JSON.stringify({
                 model: MODEL_NAME,
-                messages: [{ role: "user", content: message }],
+                prompt: fullPrompt,
                 stream: false
             })
         });
 
-        // Cek jika error dari Proxy
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("Proxy Error:", errorText);
-            return "Maaf, ada gangguan pada server AI.";
+            throw new Error(`Server Menolak (${response.status}): ${response.status === 404 ? "Cek URL/Model" : response.statusText}`);
         }
 
         const data = await response.json();
         
-        // Cek struktur balasan Ollama
-        if (data.message && data.message.content) {
-            return data.message.content;
+        if (data.response) {
+            return data.response; 
         } else {
-            console.log("Respon aneh:", data);
             return "AI bingung (Respon kosong).";
         }
 
     } catch (error) {
-        console.error("JS Error:", error);
-        return "Gagal terhubung. Cek koneksi internetmu.";
+        console.error("❌ Error AI:", error);
+        // Pesan Error Spesifik untuk Mengarahkan User
+        return `⚠️ Gagal Terhubung.\n\nSatu langkah lagi! Karena kita pakai Ngrok gratis:\n1. Buka link ini di tab baru: ${CLEAN_URL}\n2. Klik tombol "Visit Site" (warna biru/merah).\n3. Kembali ke sini dan coba chat lagi.`;
     }
-}
+};
+
+console.log("Siap! Fungsi window.askAI sudah terdaftar.");
