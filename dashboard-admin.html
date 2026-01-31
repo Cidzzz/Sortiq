@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SORTIQ - Admin Panel</title>
-    <!-- Perbaikan Favicon -->
-    <link rel="icon" type="image/png" href="logo.png?v=2">
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -14,6 +12,7 @@
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png?v=2">
 
     <!-- Config & Styles -->
     <script>
@@ -45,9 +44,8 @@
         <!-- === SIDEBAR === -->
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white border-r border-slate-800 h-full z-30 shadow-2xl transition-all duration-300">
             <div class="p-6 flex items-center gap-3 border-b border-slate-800/50">
-                <!-- LOGO FIX: Mengganti gradien menjadi gambar logo.jpg -->
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0">
-                    <img src="logo.png" alt="Logo" class="w-full h-full object-cover">
+                    <img src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=S&background=10b981&color=fff'" alt="Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="font-bold text-lg tracking-tight leading-none text-white">SORTIQ</h1>
@@ -85,9 +83,8 @@
             <!-- Header -->
             <header class="flex justify-between items-center px-6 py-4 md:px-10 md:py-5 z-20 glass sticky top-0 shadow-sm">
                 <div class="flex items-center gap-3 md:hidden">
-                    <!-- LOGO MOBILE FIX -->
                     <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                        <img src="logo.jpg" alt="S" class="w-full h-full object-cover">
+                        <img src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=S&background=10b981&color=fff'" alt="S" class="w-full h-full object-cover">
                     </div>
                     <span class="font-bold text-lg tracking-tight">SORTIQ Admin</span>
                 </div>
@@ -118,7 +115,7 @@
                             <div class="flex justify-between items-start mb-4">
                                 <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-users"></i></div>
                                 <span class="text-green-500 bg-green-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                    <i class="ph-bold ph-trend-up"></i> 12%
+                                    <i class="ph-bold ph-trend-up"></i> <span x-text="users.length"></span>
                                 </span>
                             </div>
                             <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="users.length">0</h3>
@@ -135,8 +132,8 @@
                             <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="totalTrashWeight + ' Kg'">0 Kg</h3>
                             <p class="text-xs text-slate-500 font-medium mt-1">Sampah Terkumpul</p>
                         </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
+                        
+                         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-truck"></i></div>
                                 <span x-show="pendingRequests.length > 0" class="text-red-500 bg-red-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
@@ -145,17 +142,6 @@
                             </div>
                             <h3 class="text-2xl font-black text-slate-800 tracking-tight" x-text="pendingRequests.length">0</h3>
                             <p class="text-xs text-slate-500 font-medium mt-1">Menunggu Verifikasi</p>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="bg-purple-100 text-purple-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110"><i class="ph-fill ph-gift"></i></div>
-                                <span class="text-green-500 bg-green-50 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                                    <i class="ph-bold ph-trend-up"></i> 5%
-                                </span>
-                            </div>
-                            <h3 class="text-2xl font-black text-slate-800 tracking-tight">156</h3>
-                            <p class="text-xs text-slate-500 font-medium mt-1">Reward Diklaim</p>
                         </div>
                     </div>
 
@@ -204,7 +190,8 @@
 
                 <!-- 2. VERIFIKASI (PICKUP REQUESTS) -->
                 <div x-show="currentPage === 'verify'" x-transition.opacity.duration.300ms class="max-w-7xl mx-auto">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                    <!-- ... (Kode sama, tidak berubah) ... -->
+                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
                         <div>
                             <h3 class="text-xl font-bold text-slate-800">Antrean Penjemputan Real-time</h3>
                             <p class="text-sm text-slate-500">Data masuk otomatis dari HP pengguna.</p>
@@ -264,16 +251,22 @@
                     </div>
                 </div>
 
-                <!-- 3. DATA PENGGUNA -->
+                <!-- 3. DATA PENGGUNA (UPDATED: WITH ACTIONS) -->
                 <div x-show="currentPage === 'users'" x-transition.opacity.duration.300ms class="max-w-7xl mx-auto">
                     <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                         <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                             <h3 class="font-bold text-lg text-slate-800">Database Pengguna SORTIQ</h3>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full"><span x-text="users.length"></span> Terdaftar</span>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <template x-for="user in users" :key="user.id">
-                                <div class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition cursor-pointer relative overflow-hidden">
-                                    <div class="flex items-center gap-4">
+                                <div class="bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-lg transition relative overflow-hidden group">
+                                    <!-- Status Indicator -->
+                                    <div x-show="user.isBlocked" class="absolute inset-0 bg-red-500/10 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                                        <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">TERBLOKIR</span>
+                                    </div>
+
+                                    <div class="flex items-center gap-4 mb-3">
                                         <img :src="`https://ui-avatars.com/api/?name=${user.name}&background=random`" class="w-14 h-14 rounded-2xl shadow-sm object-cover">
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-bold text-slate-800 truncate text-base" x-text="user.name"></h4>
@@ -283,24 +276,81 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Admin Actions -->
+                                    <div class="flex gap-2 border-t border-slate-100 pt-3 relative z-20">
+                                        <button @click="toggleBlockUser(user)" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1"
+                                                :class="user.isBlocked ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'">
+                                            <i :class="user.isBlocked ? 'ph-bold ph-lock-open' : 'ph-bold ph-lock'"></i>
+                                            <span x-text="user.isBlocked ? 'Buka Blokir' : 'Blokir'"></span>
+                                        </button>
+                                        <button @click="deleteUser(user.id)" class="flex-1 bg-red-100 text-red-700 hover:bg-red-200 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                                            <i class="ph-bold ph-trash"></i> Hapus
+                                        </button>
+                                    </div>
                                 </div>
                             </template>
+                             <div x-show="users.length === 0" class="col-span-full text-center py-10 text-slate-400 italic">Memuat data pengguna...</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 4. MARKET MANAGEMENT -->
-                <div x-show="currentPage === 'market'" class="text-center py-20 text-slate-400 italic">Modul Manajemen Market akan segera dihubungkan ke Firestore.</div>
+                <div x-show="currentPage === 'market'" class="max-w-7xl mx-auto">
+                   <!-- ... (Kode sama, tidak berubah) ... -->
+                     <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg text-slate-800">Manajemen Eco Market</h3>
+                        <button @click="openAddMarketModal()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-emerald-600 transition flex items-center gap-2 shadow-lg">
+                            <i class="ph-bold ph-plus"></i> Tambah Item
+                        </button>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-6">
+                        <button @click="marketFilter = 'shop'" :class="marketFilter === 'shop' ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-white text-slate-500 border-transparent'" class="px-4 py-2 rounded-xl text-sm font-bold transition border">Toko (Jual)</button>
+                        <button @click="marketFilter = 'redeem'" :class="marketFilter === 'redeem' ? 'bg-purple-100 text-purple-600 border-purple-200' : 'bg-white text-slate-500 border-transparent'" class="px-4 py-2 rounded-xl text-sm font-bold transition border">Reward (Tukar)</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <template x-for="item in filteredMarketItems" :key="item.id">
+                            <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm relative group hover:shadow-lg transition flex flex-col h-full">
+                                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition z-10">
+                                    <button @click="deleteMarketItem(item.id)" class="bg-red-100 text-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="ph-bold ph-trash"></i></button>
+                                </div>
+                                
+                                <!-- Display Image if exists, else Icon Fallback -->
+                                <div :class="item.bgClass || 'bg-slate-50'" class="h-40 rounded-2xl flex items-center justify-center text-4xl mb-4 overflow-hidden relative">
+                                    <template x-if="item.image">
+                                        <img :src="item.image" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!item.image">
+                                        <i :class="item.icon || 'ph-duotone ph-package'" class="text-slate-400"></i>
+                                    </template>
+                                </div>
+
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-800 leading-tight" x-text="item.name"></h4>
+                                    <p class="text-xs text-slate-500 mt-1 line-clamp-2" x-text="item.desc"></p>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                                    <span class="font-bold text-slate-800 text-sm" x-text="item.cost"></span>
+                                    <span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-slate-100 text-slate-500" x-text="item.type === 'xp' ? 'POIN' : 'UANG'"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div x-show="filteredMarketItems.length === 0" class="text-center py-20 text-slate-400 italic">Belum ada item di kategori ini.</div>
+                </div>
 
             </div>
         </main>
     </div>
 
-    <!-- === MODAL VERIFIKASI === -->
+    <!-- === MODALS (VERIFY & ADD MARKET) === -->
     <div x-show="showVerifyModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak style="display: none;">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showVerifyModal = false"></div>
+         <!-- ... (Verify Modal Content Same) ... -->
+          <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showVerifyModal = false"></div>
         <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
-            <div class="bg-white p-6 border-b border-slate-100 flex justify-between items-center">
+             <div class="bg-white p-6 border-b border-slate-100 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-lg text-slate-800">Detail Verifikasi</h3>
                     <p class="text-xs text-slate-400" x-text="'ID: #' + selectedReq?.id.slice(-6)"></p>
@@ -342,6 +392,76 @@
             </div>
         </div>
     </div>
+    
+    <div x-show="showAddMarketModal" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak style="display: none;">
+         <!-- ... (Add Market Modal Content Same with Image Upload) ... -->
+         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showAddMarketModal = false"></div>
+        <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl relative z-10 overflow-hidden p-6 max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Tambah Item Market Baru</h3>
+            <form @submit.prevent="saveMarketItem" class="space-y-4">
+                
+                <!-- Image Upload Section -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Foto Produk</label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-emerald-500 transition">
+                            <input type="file" accept="image/*" @change="handleImageUpload" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                            <template x-if="newItem.image">
+                                <img :src="newItem.image" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!newItem.image">
+                                <i class="ph-bold ph-camera text-2xl text-slate-400 group-hover:text-emerald-500"></i>
+                            </template>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-600 font-medium">Upload Gambar (Wajib)</p>
+                            <p class="text-xs text-slate-400 mt-1">Format: JPG/PNG. Max: 500KB.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nama Item</label>
+                    <input type="text" x-model="newItem.name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Deskripsi Singkat</label>
+                    <input type="text" x-model="newItem.desc" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Label Harga</label>
+                        <input type="text" x-model="newItem.cost" placeholder="Rp 15.000 / 1000 XP" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nilai (Angka)</label>
+                        <input type="number" x-model="newItem.priceValue" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Kategori</label>
+                        <select x-model="newItem.category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="shop">Produk Toko</option>
+                            <option value="redeem">Reward (Voucher)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tipe Pembayaran</label>
+                        <select x-model="newItem.type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <option value="money">Uang (Rp)</option>
+                            <option value="xp">Poin (XP)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="pt-4 flex gap-3">
+                    <button type="button" @click="showAddMarketModal = false" class="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-emerald-600 transition shadow-lg">Simpan Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Toast -->
     <div x-show="toast.show" x-transition class="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white pl-4 pr-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border-l-4 border-emerald-500" style="display: none;">
@@ -354,66 +474,128 @@
 
     <!-- === LOGIKA BACKEND FIREBASE (OTAK UTAMA) === -->
     <script type="module">
-        import { auth, db, onAuthStateChanged, signOut, doc, onSnapshot, collection, query, orderBy, updateDoc, getDoc } from './firebase-init.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, getDoc, increment, addDoc, deleteDoc, collectionGroup, query, where } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-        window.fbAdmin = {
-            init: (alpine) => {
-                onAuthStateChanged(auth, (user) => {
-                    // VALIDASI AKSES KHUSUS ADMIN GREGORIUS
-                    if (!user || user.email !== 'gregoriusolvans16@gmail.com') {
-                        alert("Akses Terbatas! Area khusus Admin.");
-                        window.location.href = 'login.html';
-                        return;
-                    }
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sortiq-app';
 
-                    // PERBAIKAN DI SINI: Hapus orderBy() dari query
-                    // Ambil koleksi biasa, tanpa filter/sort di level database
-                    const qDep = collection(db, "deposits");
-                    
-                    onSnapshot(qDep, (snap) => {
-                        const rawData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                        
-                        // Lakukan sorting manual menggunakan JavaScript
-                        // Urutkan berdasarkan tanggal (terbaru di atas)
-                        alpine.allDeposits = rawData.sort((a, b) => {
-                            const dateA = new Date(a.date || 0);
-                            const dateB = new Date(b.date || 0);
-                            return dateB - dateA; 
+        let db, auth;
+
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            window.fbAdmin = {
+                init: (alpine) => {
+                    onAuthStateChanged(auth, (user) => {
+                        if (!user || user.email !== 'gregoriusolvans16@gmail.com') {
+                            alert("Akses Terbatas! Area khusus Admin.");
+                            window.location.href = 'login.html';
+                            return;
+                        }
+
+                        // 1. Listen Deposits
+                        const depositsRef = collection(db, 'artifacts', appId, 'public', 'data', 'deposits');
+                        onSnapshot(depositsRef, (snap) => {
+                            const rawData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                            alpine.allDeposits = rawData.sort((a, b) => {
+                                const dateA = new Date(a.date || 0);
+                                const dateB = new Date(b.date || 0);
+                                return dateB - dateA; 
+                            });
+                        });
+
+                        // 2. Listen Market Items
+                        const marketRef = collection(db, 'artifacts', appId, 'public', 'data', 'market_items');
+                        onSnapshot(marketRef, (snap) => {
+                            alpine.marketItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        });
+
+                        // 3. LISTEN ALL USERS (Collection Group Query)
+                        // This fetches all 'data' docs inside 'profile' subcollection across all users
+                        const usersQuery = query(collectionGroup(db, 'data'), where('role', '==', 'user'));
+                        onSnapshot(usersQuery, (snap) => {
+                             // Map data and inject parent ID (UID) manually since it's nested
+                             const usersList = [];
+                             snap.forEach(docSnap => {
+                                 // Path: artifacts/{appId}/users/{uid}/profile/data
+                                 // parent.parent.id gives the {uid}
+                                 const uid = docSnap.ref.parent.parent.id;
+                                 usersList.push({ id: uid, ...docSnap.data() });
+                             });
+                             alpine.users = usersList;
                         });
                     });
-
-                    // 2. Listen Real-time Daftar User
-                    onSnapshot(collection(db, "users"), (snap) => {
-                        alpine.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    });
-                });
-            },
-            
-            // LOGIKA APPROVAL: Update status transaksi & Tambah XP User sekaligus
-            approveDeposit: async (item) => {
-                try {
-                    // 1. Update status setoran jadi Approved
-                    await updateDoc(doc(db, "deposits", item.id), { status: 'Approved' });
-                    
-                    // 2. Ambil XP user saat ini
-                    const userRef = doc(db, "users", item.uid);
-                    const userSnap = await getDoc(userRef);
-                    
-                    if (userSnap.exists()) {
-                        const currentXP = userSnap.data().xp || 0;
-                        // 3. Tambahkan XP reward dari setoran
-                        await updateDoc(userRef, { xp: currentXP + item.xpReward });
-                        return true;
+                },
+                
+                approveDeposit: async (item) => {
+                    try {
+                        const depositRef = doc(db, 'artifacts', appId, 'public', 'data', 'deposits', item.id);
+                        await updateDoc(depositRef, { status: 'Approved' });
+                        if (item.uid) {
+                            const userRef = doc(db, 'artifacts', appId, 'users', item.uid, 'profile', 'data');
+                            await updateDoc(userRef, { xp: increment(item.xpReward) });
+                            return true;
+                        }
+                        return false;
+                    } catch (e) {
+                        console.error("Error approving:", e);
+                        return false;
                     }
-                    return false;
-                } catch (e) {
-                    console.error(e);
-                    return false;
-                }
-            },
+                },
 
-            logout: () => signOut(auth).then(() => window.location.href = 'login.html')
-        };
+                addMarketItem: async (itemData) => {
+                    try {
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'market_items'), itemData);
+                        return true;
+                    } catch(e) {
+                        console.error("Add item failed:", e);
+                        return false;
+                    }
+                },
+
+                deleteMarketItem: async (itemId) => {
+                    if(!confirm("Hapus item ini dari market?")) return;
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'market_items', itemId));
+                    } catch(e) {
+                        console.error("Delete failed", e);
+                    }
+                },
+
+                // USER MANAGEMENT ACTIONS
+                toggleBlockUser: async (user) => {
+                    try {
+                        const userRef = doc(db, 'artifacts', appId, 'users', user.id, 'profile', 'data');
+                        const newStatus = !user.isBlocked;
+                        await updateDoc(userRef, { isBlocked: newStatus });
+                        return true;
+                    } catch(e) {
+                        console.error("Block user failed:", e);
+                        return false;
+                    }
+                },
+
+                deleteUser: async (uid) => {
+                    if(!confirm("PERINGATAN: Menghapus user akan menghilangkan data profil mereka permanen. Lanjutkan?")) return;
+                    try {
+                         // Delete Profile Doc
+                         const userRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                         await deleteDoc(userRef);
+                         // Note: Idealnya Auth user juga dihapus via Admin SDK, tapi di client-side cukup hapus data DB
+                         return true;
+                    } catch(e) {
+                        console.error("Delete user failed:", e);
+                        return false;
+                    }
+                },
+
+                logout: () => signOut(auth).then(() => window.location.href = 'login.html')
+            };
+        }
     </script>
 
     <script>
@@ -425,6 +607,7 @@
                 adminEmail: 'gregoriusolvans16@gmail.com',
                 
                 showVerifyModal: false,
+                showAddMarketModal: false,
                 selectedReq: null,
                 isProcessing: false,
                 
@@ -435,22 +618,29 @@
                     { id: 'market', label: 'Manajemen Market', icon: 'ph-bold ph-storefront' },
                 ],
 
-                // Firebase Sync Data
                 allDeposits: [],
-                users: [],
+                users: [], 
+                marketItems: [], 
+                marketFilter: 'shop',
                 
+                newItem: { name: '', desc: '', cost: '', priceValue: 0, type: 'money', category: 'shop', image: null },
+
                 get pendingRequests() { return this.allDeposits.filter(d => d.status === 'Pending'); },
                 get totalTrashWeight() { 
                     return this.allDeposits
                         .filter(d => d.status === 'Approved')
                         .reduce((acc, curr) => acc + parseFloat(curr.weight), 0).toFixed(1); 
                 },
+                get filteredMarketItems() {
+                    return this.marketItems.filter(i => i.category === this.marketFilter);
+                },
 
                 toast: { show: false, title: '', message: '' },
 
                 init() {
-                    // Beri waktu sebentar agar module Firebase siap
-                    setTimeout(() => window.fbAdmin.init(this), 500);
+                    setTimeout(() => {
+                        if (window.fbAdmin) window.fbAdmin.init(this);
+                    }, 500);
                     this.$nextTick(() => this.initChart());
                 },
 
@@ -476,6 +666,54 @@
                         alert("Gagal memproses. Coba lagi.");
                     }
                     this.isProcessing = false;
+                },
+
+                openAddMarketModal() {
+                    this.newItem = { name: '', desc: '', cost: '', priceValue: 0, type: 'money', category: this.marketFilter, image: null };
+                    this.showAddMarketModal = true;
+                },
+
+                handleImageUpload(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 500000) {
+                        alert("Ukuran gambar terlalu besar! Maksimal 500KB.");
+                        e.target.value = ''; 
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        this.newItem.image = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                async saveMarketItem() {
+                    if(!this.newItem.image) {
+                        alert("Wajib upload gambar produk!");
+                        return;
+                    }
+                    const success = await window.fbAdmin.addMarketItem(this.newItem);
+                    if(success) {
+                        this.showToast('Sukses', 'Item berhasil ditambahkan ke market');
+                        this.showAddMarketModal = false;
+                    } else {
+                        alert("Gagal menyimpan item.");
+                    }
+                },
+
+                deleteMarketItem(id) {
+                    window.fbAdmin.deleteMarketItem(id);
+                },
+
+                async toggleBlockUser(user) {
+                    const success = await window.fbAdmin.toggleBlockUser(user);
+                    if(success) this.showToast('Sukses', `Status user ${user.name} diperbarui.`);
+                },
+
+                async deleteUser(id) {
+                    const success = await window.fbAdmin.deleteUser(id);
+                    if(success) this.showToast('Terhapus', 'Data user berhasil dihapus.');
                 },
 
                 showToast(title, message) {
